@@ -1,0 +1,23 @@
+#ifndef __@LIBRARY_NAME@_EXPORT_h_INCLUDED__
+#define __@LIBRARY_NAME@_EXPORT_h_INCLUDED__
+
+// Automatically generated file which defines 
+// the symbols @LIBRARY_NAME@_EXPORT and @LIBRARY_NAME@_CDECL
+// to be used for the definition of classes or functions
+// which must be exported when the lib is built as a shared lib on Windows
+// and imported when the shared lib is used by another program
+
+#if defined(_WIN32) && defined (@LIBRARY_NAME@_BUILD_SHARED)
+  #ifdef @LIBRARY_NAME@_EXPORT_SYMBOLS
+    #define @LIBRARY_NAME@_EXPORT __declspec( dllexport )
+  #else
+    #define @LIBRARY_NAME@_EXPORT __declspec( dllimport )
+  #endif
+  #define @LIBRARY_NAME@_CDECL __cdecl
+#else
+  #define @LIBRARY_NAME@_EXPORT
+  #define @LIBRARY_NAME@_CDECL
+#endif // defined(_WIN32)
+
+#endif
+
