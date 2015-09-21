@@ -58,6 +58,31 @@
 #include <iostream>
 #include <fstream>
 
+
+#include "DMDT2Fitting.h"
+#include "DMDCalib.h"
+#include "itkImageFileReader.h"
+#include "itkImageFileWriter.h"
+#include "itkImage.h"
+#include "itkTransformFileReader.h"
+#include "itkAffineTransform.h"
+#include "itkTransformFactory.h"
+#include "itkResampleImageFilter.h"
+#include "itkDivideImageFilter.h"
+#include "DMDCurveFit.h"
+#include <itksys/Process.h>
+
+#include "TextureFeatureCal.h"
+
+#include <algorithm>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>      /* need functions 'toupper' and tolower'   */
+#include <float.h>      /* defines LDBL_MAX*/
+#include <math.h>
+#include <time.h>       /* for date marking of output data files   */
+
 typedef itk::Image< float, 3>  synImageType;    
 typedef itk::ImageFileWriter< synImageType >                  ImageWriterType;
 ImageWriterType::Pointer                    syntheticWriter = ImageWriterType::New();
@@ -191,7 +216,7 @@ int main( int argc, char* argv[] )
         // erode muscle mask by 1 voxel -- morphological erosion
         //data.morphMultiGrayErod2DIn3D ( segMuscleLeft->GetOutput(), erodeSegMuscleLeft, 0 ) ;
         // smooth t2 weighted left femur image and write it out
-        data.smoothGradAnisoDiff( t2LeftFemur, t2LeftFemurSmooth, 5, 0.0625, 1.00 ); 
+        data.smoothGradAnisoDiff( t2LeftFemur, t2LeftFemurSmooth, 5, 0.05, 1.00 );
         writer->SetInput( t2LeftFemurSmooth );
         outputFilename = procDirectory + "Smooth.nrrd";
         data.dataWriter(writer, outputFilename);    

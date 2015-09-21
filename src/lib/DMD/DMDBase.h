@@ -16,19 +16,15 @@
  *
 =========================================================================*/
 
-#include "itkOrientedImage.h"
-
 class DMDBase {
     private:
   
     public:
         const unsigned int                                          Dimension;
 	typedef float                                               PixelType;
-        DMDBase( int d ) : Dimension(3)    //  use a member initialization list to initialize a data member 
-	{                       
-	  //    typedef float                                           PixelType;
-	    //            typedef itk::OrientedImage< PixelType, Dimension>       ImageType;   
-	}
+        DMDBase( int d ){
+            Dimension = 3;
+        }
 };
 
       

@@ -50,7 +50,7 @@ IF ( BUILD_${LIBRARY_NAME} )
   #
   SET ( ${LIBRARY_NAME}_LINK_LIBRARIES
   #    ${VTK_LIBRARIES}
-  #    ${ITK_LIBRARIES}
+      ${ITK_LIBRARIES}
   #    ${GDCM_LIBRARIES}
   #    ${BOOST_LIBRARIES}
   #    ${XERCES_LIBRARIES}
@@ -60,7 +60,7 @@ IF ( BUILD_${LIBRARY_NAME} )
 
   #----------------------------------------------------------------------------
   CREA_ADD_LIBRARY(${LIBRARY_NAME})
-  SET_TARGET_PROPERTIES(${LIBRARY_NAME} PROPERTIES LINKER_LANGUAGE C)
+  #SET_TARGET_PROPERTIES(${LIBRARY_NAME} PROPERTIES LINKER_LANGUAGE C)
   #CREA_ADD_CUSTOM_TARGET(${LIBRARY_NAME})
 
   #----------------------------------------------------------------------------

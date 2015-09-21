@@ -21,10 +21,9 @@ install(TARGETS ${EXE_NAME}
 
 
 SET(EXE_NAME TextureBioMarkerTool)
-SET(${EXE_NAME}_LIBRARIES  ${ITK_LIBRARIES})
+SET(${EXE_NAME}_LIBRARIES DMD)
 
 add_executable(${EXE_NAME}   ${EXE_NAME}.cxx)
-set_target_properties(${EXE_NAME} PROPERTIES LINKER_LANGUAGE C)
 target_link_libraries(${EXE_NAME} ${${EXE_NAME}_LIBRARIES})
 install(TARGETS ${EXE_NAME}
         RUNTIME
