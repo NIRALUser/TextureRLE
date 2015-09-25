@@ -216,7 +216,7 @@ int main( int argc, char* argv[] )
         // erode muscle mask by 1 voxel -- morphological erosion
         //data.morphMultiGrayErod2DIn3D ( segMuscleLeft->GetOutput(), erodeSegMuscleLeft, 0 ) ;
         // smooth t2 weighted left femur image and write it out
-        data.smoothGradAnisoDiff( t2LeftFemur, t2LeftFemurSmooth, 5, 0.05, 1.00 );
+        data.smoothGradAnisoDiff( t2LeftFemur, t2LeftFemurSmooth, 5, 0.01, 1.00 );
         writer->SetInput( t2LeftFemurSmooth );
         outputFilename = procDirectory + "Smooth.nrrd";
         data.dataWriter(writer, outputFilename);    

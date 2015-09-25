@@ -72,6 +72,9 @@ TextureFeatureCal::TextureFeatureCal(){
      entropyVasmed = 0;
      entropyVasint = 0;
      entropyCaud;
+
+     labelMin = 0;
+     labelMax = 0;
 }
 
 //////////////////////////////////////////////////////////////////////////

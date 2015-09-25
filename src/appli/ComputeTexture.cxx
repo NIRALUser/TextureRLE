@@ -2,7 +2,7 @@
 #include "itkImageFileReader.h"
 #include "itkImageFileWriter.h"
 #include <itkDenseFrequencyContainer2.h>
-#include "itkHistogramToTextureFeaturesFilter.h"
+#include <itkHistogramToTextureFeaturesFilter.h>
 #include "itkScalarImageToCooccurrenceMatrixFilter.h"
 #include "itkVectorContainer.h"
 #include "itkAddImageFilter.h"
