@@ -1,4 +1,7 @@
 
+FIND_PACKAGE(SlicerExecutionModel REQUIRED)
+include(${SlicerExecutionModel_USE_FILE})
+include(${GenerateCLP_USE_FILE})
 
 FIND_PACKAGE(ITK REQUIRED)
 IF(${ITK_FOUND})
@@ -9,6 +12,7 @@ FIND_PACKAGE(VTK REQUIRED)
 IF(${VTK_FOUND})
 	include(${VTK_USE_FILE})
 ENDIF(${VTK_FOUND})
+
 
 SET(USER_CMAKE_MACROS ${PROJECT_SOURCE_DIR}/src/cmake)
 INCLUDE(${USER_CMAKE_MACROS}/UserMacros.cmake)

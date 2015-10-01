@@ -10,14 +10,11 @@ ENDFOREACH(NAME)
 
 SET(EXE_NAME ComputeTexture)
 SET(${EXE_NAME}_LIBRARIES  ${ITK_LIBRARIES})
-
 add_executable(${EXE_NAME}   ${EXE_NAME}.cxx)
 target_link_libraries(${EXE_NAME} ${${EXE_NAME}_LIBRARIES})
 install(TARGETS ${EXE_NAME}
         RUNTIME
         DESTINATION bin)
-
-
 
 
 SET(EXE_NAME TextureBioMarkerTool)
@@ -37,5 +34,18 @@ add_executable(${EXE_NAME}   ${EXE_NAME}.c)
 set_target_properties(${EXE_NAME} PROPERTIES LINKER_LANGUAGE C)
 target_link_libraries(${EXE_NAME} ${${EXE_NAME}_LIBRARIES})
 install(TARGETS ${EXE_NAME}
+        RUNTIME
+        DESTINATION bin)
+
+
+
+SET(EXE_NAME CoMatrixTextureTool)
+SET(${EXE_NAME}_LIBRARIES  ${ITK_LIBRARIES})
+SET(${EXE_NAME}_SOURCE ${EXE_NAME}.cxx)
+
+GENERATECLP(${EXE_NAME}_SOURCE ${EXE_NAME}.xml )
+add_executable(${EXE_NAME}   ${${EXE_NAME}_SOURCE})
+target_link_libraries(${EXE_NAME} ${${EXE_NAME}_LIBRARIES})
+install(TARGETS ${${EXE_NAME}}
         RUNTIME
         DESTINATION bin)
