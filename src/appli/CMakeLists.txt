@@ -39,7 +39,7 @@ install(TARGETS ${EXE_NAME}
 
 
 
-SET(EXE_NAME CoMatrixTextureTool)
+SET(EXE_NAME ComponentSizeRLE)
 SET(${EXE_NAME}_LIBRARIES  ${ITK_LIBRARIES})
 SET(${EXE_NAME}_SOURCE ${EXE_NAME}.cxx)
 

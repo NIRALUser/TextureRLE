@@ -1,5 +1,5 @@
 
-#include "CoMatrixTextureToolCLP.h"
+#include "ComponentSizeRLECLP.h"
 
 
 #include <itkImageFileReader.h>
