@@ -35,7 +35,7 @@ namespace  Statistics {
  *
  *
  */
-template <class TInputImage, class THistogram = itk::Statistics::Histogram< int > >
+template <class TInputImage >
 class ScalarImageToIntensitySizeRunLengthFeaturesFilter
   : public ProcessObject
 {
@@ -64,12 +64,12 @@ public:
 
     typedef itk::Statistics::Histogram< int > HistogramType;
     typedef itk::Statistics::HistogramToRunLengthFeaturesFilter< HistogramType > HistogramToRunLengthFeaturesFilterType;
-    typedef typename HistogramToRunLengthFeaturesFilterType::MeasurementType MeasurementType;
     typedef typename HistogramToRunLengthFeaturesFilterType::Pointer HistogramToRunLengthFeaturesFilterPointerType;
 
+    typedef typename HistogramToRunLengthFeaturesFilterType::MeasurementType MeasurementType;
+    typedef typename HistogramToRunLengthFeaturesFilterType::MeasurementVectorType MeasurementVectorType;
 
-    typedef itk::MapContainer< string, MeasurementType > MapContainterType;
-    typedef typename MapContainterType::Pointer MapContainterPointerType;
+
 
     void PrintSelf(std::ostream & os, Indent indent) const ITK_OVERRIDE;
 
@@ -82,28 +82,70 @@ public:
     const InputImageType * GetInput() const;
     const InputImageType * GetInput(unsigned int idx) const;
 
-    const MapContainterType* GetOutput();
-
     itkSetMacro(InputMask, InputImagePointer)
     itkGetMacro(InputMask, InputImageConstPointer)
+    itkSetMacro(BackgroundValue, InputImagePixelType)
+    itkGetMacro(BackgroundValue, InputImagePixelType)
 
+    itkSetMacro(UseMinMaxIntensity, bool)
+    itkGetMacro(UseMinMaxIntensity, bool)
     itkSetMacro(MinIntensity, InputImagePixelType)
     itkGetMacro(MinIntensity, InputImagePixelType)
-
     itkSetMacro(MaxIntensity, InputImagePixelType)
     itkGetMacro(MaxIntensity, InputImagePixelType)
-
     itkSetMacro(NumberOfIntensityBins, int)
     itkGetMacro(NumberOfIntensityBins, int)
 
+    itkSetMacro(UseMinMaxSize, bool)
+    itkGetMacro(UseMinMaxSize, bool)
+    itkSetMacro(MinSize, int)
+    itkGetMacro(MinSize, int)
+    itkSetMacro(MaxSize, int)
+    itkGetMacro(MaxSize, int)
     itkSetMacro(NumberOfSizeBins, int)
     itkGetMacro(NumberOfSizeBins, int)
 
-    itkSetMacro(ComputeMinMaxIntensity, bool)
-    itkGetMacro(ComputeMinMaxIntensity, bool)
 
-    itkSetMacro(BackgroundValue, InputImagePixelType)
-    itkGetMacro(BackgroundValue, InputImagePixelType)
+    //OUTPUTS
+
+    itkGetMacro(ShortRunEmphasis, MeasurementType)
+    itkSetMacro(ShortRunEmphasis, MeasurementType)
+
+    itkGetMacro(LongRunEmphasis, MeasurementType)
+    itkSetMacro(LongRunEmphasis, MeasurementType)
+
+    itkGetMacro(GreyLevelNonuniformity, MeasurementType)
+    itkSetMacro(GreyLevelNonuniformity, MeasurementType)
+
+    itkGetMacro(RunLengthNonuniformity, MeasurementType)
+    itkSetMacro(RunLengthNonuniformity, MeasurementType)
+
+    itkGetMacro(LowGreyLevelRunEmphasis, MeasurementType)
+    itkSetMacro(LowGreyLevelRunEmphasis, MeasurementType)
+
+    itkGetMacro(HighGreyLevelRunEmphasis, MeasurementType)
+    itkSetMacro(HighGreyLevelRunEmphasis, MeasurementType)
+
+    itkGetMacro(ShortRunLowGreyLevelEmphasis, MeasurementType)
+    itkSetMacro(ShortRunLowGreyLevelEmphasis, MeasurementType)
+
+    itkGetMacro(ShortRunHighGreyLevelEmphasis, MeasurementType)
+    itkSetMacro(ShortRunHighGreyLevelEmphasis, MeasurementType)
+
+    itkGetMacro(LongRunLowGreyLevelEmphasis, MeasurementType)
+    itkSetMacro(LongRunLowGreyLevelEmphasis, MeasurementType)
+
+    itkGetMacro(LongRunHighGreyLevelEmphasis, MeasurementType)
+    itkSetMacro(LongRunHighGreyLevelEmphasis, MeasurementType)
+
+
+    ostream* GetHistogramOutput(){
+        return &m_HistogramOutput;
+    }
+
+    void SetHistogramOutput(ostream* os){
+        m_HistogramOutput = *os;
+    }
 
 protected:
     ScalarImageToIntensitySizeRunLengthFeaturesFilter();
@@ -128,10 +170,28 @@ private:
 
   InputImagePixelType m_MinIntensity;
   InputImagePixelType m_MaxIntensity;
+  bool m_UseMinMaxIntensity;
+
+  int m_MinSize;
+  int m_MaxSize;
+  bool m_UseMinMaxSize;
+
   InputImagePixelType m_BackgroundValue;
   int m_NumberOfIntensityBins;
   int m_NumberOfSizeBins;
-  bool m_ComputeMinMaxIntensity;
+
+  MeasurementType m_ShortRunEmphasis;
+  MeasurementType m_LongRunEmphasis;
+  MeasurementType m_GreyLevelNonuniformity;
+  MeasurementType m_RunLengthNonuniformity;
+  MeasurementType m_LowGreyLevelRunEmphasis;
+  MeasurementType m_HighGreyLevelRunEmphasis;
+  MeasurementType m_ShortRunLowGreyLevelEmphasis;
+  MeasurementType m_ShortRunHighGreyLevelEmphasis;
+  MeasurementType m_LongRunLowGreyLevelEmphasis;
+  MeasurementType m_LongRunHighGreyLevelEmphasis;
+
+  ostringstream m_HistogramOutput;
 
 };
 

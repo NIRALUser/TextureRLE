@@ -82,9 +82,7 @@ public:
     const InputImageType * GetInput() const;
     const InputImageType * GetInput(unsigned int idx) const;
 
-    /** Method to get the list sample, the generated output. Note that this does
-     * not invoke Update(). You should have called update on this class to get
-     * any meaningful output. */
+
     const SampleType * GetOutput() const;
 
     itkSetMacro(MinIntensity, InputImagePixelType)
@@ -96,8 +94,17 @@ public:
     itkSetMacro(NumberOfIntensityBins, int)
     itkGetMacro(NumberOfIntensityBins, int)
 
+    itkSetMacro(MinSize, int)
+    itkGetMacro(MinSize, int)
+
+    itkSetMacro(MaxSize, int)
+    itkGetMacro(MaxSize, int)
+
     itkSetMacro(BackgroundValue, InputImagePixelType)
     itkGetMacro(BackgroundValue, InputImagePixelType)
+
+    itkSetMacro(IntensityBinSize, int)
+    itkGetMacro(IntensityBinSize, int)
 
 protected:
     ScalarImageToIntensitySizeListSampleFilter();
@@ -119,6 +126,10 @@ private:
   InputImagePixelType m_MaxIntensity;
   InputImagePixelType m_BackgroundValue;
   int m_NumberOfIntensityBins;
+
+  int m_MinSize;
+  int m_MaxSize;
+  int m_IntensityBinSize;
 
 };
 

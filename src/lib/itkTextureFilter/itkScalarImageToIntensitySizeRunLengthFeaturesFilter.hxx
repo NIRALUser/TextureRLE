@@ -37,10 +37,15 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
 {
     m_MinIntensity = 0;
     m_MaxIntensity = 0;
-    m_NumberOfIntensityBins = 32;
-    m_NumberOfSizeBins = 32;
+    m_UseMinMaxIntensity = false;
 
-    m_ComputeMinMaxIntensity = true;
+    m_MinSize = 1;
+    m_MaxSize = -1;
+    m_UseMinMaxSize = false;
+
+    m_NumberOfIntensityBins = 16;
+    m_NumberOfSizeBins = 16;
+
     m_BackgroundValue = 0;
     m_InputMask = 0;
 
@@ -56,10 +61,8 @@ typename ScalarImageToIntensitySizeRunLengthFeaturesFilter< TImage >::DataObject
 ScalarImageToIntensitySizeRunLengthFeaturesFilter< TImage >
 ::MakeOutput( DataObjectPointerArraySizeType itkNotUsed(idx) )
 {
-  typedef itk::DataObjectDecorator< MapContainterType > DataObjectDecoratorType;
-  typename DataObjectDecoratorType::Pointer objdec = DataObjectDecoratorType::New();
-    objdec->Set(MapContainterType::New());
-  return objdec.GetPointer();
+  typedef itk::DataObjectDecorator< HistogramType > DataObjectDecoratorType;
+  return DataObjectDecoratorType::New().GetPointer();
 }
 
 /**
@@ -126,18 +129,6 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TImage >
 }
 
 template< typename TInputImage >
-const typename ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >::MapContainterType*
-ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >::GetOutput(){
-
-    typedef itk::DataObjectDecorator< MapContainterType > DataObjectDecoratorType;
-    const DataObjectDecoratorType* objdecorator = static_cast<const DataObjectDecoratorType*>(this->ProcessObject::GetOutput(0));
-    const MapContainterType* output = static_cast<const MapContainterType*>(objdecorator->Get());
-
-    return output;
-
-}
-
-template< typename TInputImage >
 void
 ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
 ::GenerateData()
@@ -167,7 +158,7 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
   typedef typename  ScalarImageToIntensitySizeListSampleType::SamplePointerType SamplePointerType;
 
   //Compute min max intensity of the image
-  if(this->GetComputeMinMaxIntensity()){
+  if(!(this->GetUseMinMaxIntensity())){
       InputImageRegionIteratorType it(inputImage, inputImage->GetLargestPossibleRegion());
       InputImagePixelType minvalue = numeric_limits< InputImagePixelType >::max();
       InputImagePixelType maxvalue = numeric_limits< InputImagePixelType >::min();
@@ -187,46 +178,120 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
       this->SetMaxIntensity(maxvalue);
   }
 
-  //Get the sample vector with the measurements of the size.
+  //Generate a sample vector.
+  //The sample vector is generated using the intensity and the size of each component
   ScalarImageToIntensitySizeListSamplePointerType runlengthfilter = ScalarImageToIntensitySizeListSampleType::New();
   runlengthfilter->SetMinIntensity(this->GetMinIntensity());
   runlengthfilter->SetMaxIntensity(this->GetMaxIntensity());
   runlengthfilter->SetNumberOfIntensityBins(this->GetNumberOfIntensityBins());
+  runlengthfilter->SetMinSize(this->GetMinSize());
+  if(this->GetMaxSize() != -1){
+      runlengthfilter->SetMaxSize(this->GetMaxSize());
+  }
   runlengthfilter->SetBackgroundValue(this->GetBackgroundValue());
   runlengthfilter->SetInput(inputImage);
   runlengthfilter->Update();
 
   SampleType* sample = const_cast< SampleType* >(runlengthfilter->GetOutput());
 
-  //Generate a histogram from the samples and use the bin sizes for intensity and size.
+  if(this->GetMaxSize() == -1){
+      int max = numeric_limits<int>::min();
+      cout<<"Calculating the max size of the components..."<<endl;
+      for(int i = 0; i < sample->GetTotalFrequency(); i++){
+          int val = sample->GetMeasurementVector(i)[1];
+          if(max < val){
+              max = val;
+          }
+      }
+      this->SetMaxSize(max);
+  }
+
+  //Set the bin ranges for the histogram.
+  MeasurementVectorType binmin;
+  binmin.SetSize(2);
+  binmin[0] = this->GetMinIntensity();
+  binmin[1] = this->GetMinSize();
+
+  MeasurementVectorType binmax;
+  binmax.SetSize(2);
+  binmax[0] = this->GetMaxIntensity();
+  binmax[1] = this->GetMaxSize();
+
+  //Generate a histogram from the samples. AutoMinMax is set to false in order to generate the correct bining using the values
   typedef itk::Statistics::SampleToHistogramFilter< SampleType, HistogramType > SampleToHistogramFilterType;
   typedef typename  SampleToHistogramFilterType::Pointer SampleToHistogramFilterPointerType;
   SampleToHistogramFilterPointerType sampleToHistogram = SampleToHistogramFilterType::New();
   typename SampleToHistogramFilterType::HistogramSizeType histogramSize(2);
   histogramSize[0] = this->GetNumberOfIntensityBins();
   histogramSize[1] = this->GetNumberOfSizeBins();
+  sampleToHistogram->SetAutoMinimumMaximum(false);
+  sampleToHistogram->SetHistogramBinMinimum(binmin);
+  sampleToHistogram->SetHistogramBinMaximum(binmax);
   sampleToHistogram->SetHistogramSize(histogramSize);
   sampleToHistogram->SetInput(sample);
   sampleToHistogram->Update();
   const HistogramType* histogram = sampleToHistogram->GetOutput();
+
+  HistogramType::SizeType size = histogram->GetSize();
+  unsigned int totalBins = 1;
+  for(unsigned int i = 0; i < size.GetNumberOfElements(); i++){
+      totalBins *= histogram->GetSize()[i];
+  }
+
+
+  m_HistogramOutput.clear();
+
+  m_HistogramOutput << "BinId, ";
+
+  HistogramType::BinMinContainerType mins = histogram->GetMins();
+  HistogramType::BinMaxContainerType maxs = histogram->GetMaxs();
+
+  int count = 0;
+  for(unsigned k = 0; k < mins[1].size(); k++){
+      for(unsigned j = 0; j < mins[0].size(); j++){
+          m_HistogramOutput << "[";
+          m_HistogramOutput << mins[0][j];
+          m_HistogramOutput << "-";
+          m_HistogramOutput << maxs[0][j];
+          m_HistogramOutput <<"]";
+
+          m_HistogramOutput << "-";
+
+          m_HistogramOutput << "[";
+          m_HistogramOutput << mins[1][k];
+          m_HistogramOutput << "-";
+          m_HistogramOutput << maxs[1][k];
+          m_HistogramOutput <<"]";
+          m_HistogramOutput <<",";
+          count++;
+      }
+  }
+
+  m_HistogramOutput << endl;
+
+  m_HistogramOutput << "Frequency, ";
+  for(unsigned int i = 0; i < totalBins; ++i){
+      m_HistogramOutput << histogram->GetFrequency(i) << ", ";
+  }
+
+  m_HistogramOutput << endl;
+
 
   //Calculate the RLE features of the histogram.
   HistogramToRunLengthFeaturesFilterPointerType histogramtorunlength = HistogramToRunLengthFeaturesFilterType::New();
   histogramtorunlength->SetInput(histogram);
   histogramtorunlength->Update();
 
-  typename MapContainterType::STLContainerType output = this->GetOutput()->CastToSTLConstContainer();
-
-    output["ShortRunEmphasis"] = histogramtorunlength->GetShortRunEmphasis();
-    output["LongRunEmphasis"] = histogramtorunlength->GetLongRunEmphasis();
-    output["GreyLevelNonuniformity"] = histogramtorunlength->GetGreyLevelNonuniformity();
-    output["RunLengthNonuniformity"] = histogramtorunlength->GetRunLengthNonuniformity();
-    output["LowGreyLevelRunEmphasis"] = histogramtorunlength->GetLowGreyLevelRunEmphasis();
-    output["HighGreyLevelRunEmphasis"] = histogramtorunlength->GetHighGreyLevelRunEmphasis();
-    output["ShorRunLowGreyLevelEmphasis"] = histogramtorunlength->GetShortRunLowGreyLevelEmphasis();
-    output["ShorRunHighGreyLevelEmphasis"] = histogramtorunlength->GetShortRunHighGreyLevelEmphasis();
-    output["LongRunLowGreyLevelEmphasis"] = histogramtorunlength->GetLongRunLowGreyLevelEmphasis();
-    output["LongRunHighGreyLevelEmphasis"] = histogramtorunlength->GetLongRunHighGreyLevelEmphasis();
+  this->SetShortRunEmphasis(histogramtorunlength->GetShortRunEmphasis());
+  this->SetLongRunEmphasis(histogramtorunlength->GetLongRunEmphasis());
+  this->SetGreyLevelNonuniformity(histogramtorunlength->GetGreyLevelNonuniformity());
+  this->SetRunLengthNonuniformity(histogramtorunlength->GetRunLengthNonuniformity());
+  this->SetLongRunLowGreyLevelEmphasis(histogramtorunlength->GetLowGreyLevelRunEmphasis());
+  this->SetHighGreyLevelRunEmphasis(histogramtorunlength->GetHighGreyLevelRunEmphasis());
+  this->SetLowGreyLevelRunEmphasis(histogramtorunlength->GetShortRunLowGreyLevelEmphasis());
+  this->SetGreyLevelNonuniformity(histogramtorunlength->GetShortRunHighGreyLevelEmphasis());
+  this->SetLongRunLowGreyLevelEmphasis(histogramtorunlength->GetLongRunLowGreyLevelEmphasis());
+  this->SetLongRunHighGreyLevelEmphasis(histogramtorunlength->GetLongRunHighGreyLevelEmphasis());
 
 
 }
@@ -243,7 +308,7 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
     os << indent << "BackgroundValue: "<< m_BackgroundValue <<endl;
     os << indent << "NumberOfIntensityBins: "<< m_NumberOfIntensityBins <<endl;
     os << indent << "NumberOfSizeBins"<< m_NumberOfSizeBins <<endl;
-    os << indent << "ComputeMinMaxIntensity"<< m_ComputeMinMaxIntensity <<endl; m_ComputeMinMaxIntensity;
+    os << indent << "ComputeMinMaxIntensity"<< m_UseMinMaxIntensity <<endl;
 }
 
 }// namespace statistics

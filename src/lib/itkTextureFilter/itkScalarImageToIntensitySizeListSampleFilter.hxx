@@ -37,6 +37,9 @@ ScalarImageToIntensitySizeListSampleFilter< TInputImage >
     m_MinIntensity = 0;
     m_MaxIntensity = 0;
     m_NumberOfIntensityBins = 1;
+
+    m_MinSize = 1;
+    m_MaxSize = numeric_limits<int>::max();
     m_BackgroundValue = 0;
 
     this->SetNumberOfRequiredInputs(1);
@@ -155,13 +158,28 @@ ScalarImageToIntensitySizeListSampleFilter< TInputImage >
   SampleType *output = static_cast< SampleType * >( this->ProcessObject::GetOutput(0) );
 
   //Calculate the step size given the maximum intensity, minimum and the number of desired intensity bins.
-  double step = (this->GetMaxIntensity() - this->GetMinIntensity())/this->GetNumberOfIntensityBins();
+  this->SetIntensityBinSize(round((this->GetMaxIntensity() - this->GetMinIntensity())/this->GetNumberOfIntensityBins()));
+  int binsize = this->GetIntensityBinSize();
 
-  for(int i = 0; i < this->GetNumberOfIntensityBins(); i++){
+  if(binsize <= 0){
+      cerr<<"MaxIntesity: "<<this->GetMaxIntensity()<<endl;
+      cerr<<"MinIntesity: "<<this->GetMinIntensity()<<endl;
+      cerr<<"NumberOfIntensityBins: "<<this->GetNumberOfIntensityBins()<<endl;
+      cerr<<"Binsize = (maxIntensity - minIntensity)/numberOfBins"<<endl;
+      itkExceptionMacro("ERROR: Intensity bin size is 0. Please reduce the number of intensity bins.")
+  }
 
-      //Calculate the min-max intensity for the given bin, add + 1 to the minimum to avoid overlapping and not take into account the background
-      InputImagePixelType minintensity = i*step + 1;
-      InputImagePixelType maxintensity = (i+1)*step;
+  InputImagePixelType minintensity = this->GetMinIntensity();
+  InputImagePixelType maxintensity = this->GetMinIntensity();
+
+  for(int i = 0; i < this->GetNumberOfIntensityBins() && maxintensity < this->GetMaxIntensity(); i++){
+
+      minintensity = maxintensity;
+      maxintensity = minintensity + binsize;
+
+      if(minintensity == this->GetBackgroundValue()){
+          minintensity = maxintensity;
+      }
 
       //Threshold the image using the threshold values
       ThresholdImageFilterPointerType thresholdfilter = ThresholdImageFilterType::New();
@@ -170,26 +188,26 @@ ScalarImageToIntensitySizeListSampleFilter< TInputImage >
       thresholdfilter->SetLowerThreshold(minintensity);
       thresholdfilter->SetUpperThreshold(maxintensity);
       thresholdfilter->SetOutsideValue(0);
-      thresholdfilter->SetInsideValue(1);
+      thresholdfilter->SetInsideValue(255);
       thresholdfilter->Update();
       OutputImagePointerType imgthresh = thresholdfilter->GetOutput();
-
-      typedef itk::ImageFileWriter< OutputImageType > ImageFileWriterType;
-      typename ImageFileWriterType::Pointer writer = ImageFileWriterType::New();
-      writer->SetInput(imgthresh);
-      writer->SetFileName("temp.nrrd");
-      writer->Update();
 
       //Calculate the connected components and label each one of them with a unique value
       typename ConnectedComponentImageFilterType::Pointer connectedcomponents = ConnectedComponentImageFilterType::New();
       connectedcomponents->SetInput(imgthresh);
-      connectedcomponents->Update();
+
       OutputImagePointerType imglabel = connectedcomponents->GetOutput();
+
+      typedef itk::ImageFileWriter< OutputImageType > ImageFileWriterType;
+      typename ImageFileWriterType::Pointer writer = ImageFileWriterType::New();
+      writer->SetInput(imglabel);
+      writer->SetFileName("temp.nrrd");
+      writer->Update();
 
       //Compute statistics for each label
       LabelStatisticsImageFilterPointerType labelstatistics = LabelStatisticsImageFilterType::New();
       labelstatistics->SetLabelInput(imglabel);
-      labelstatistics->SetInput(imgthresh);
+      labelstatistics->SetInput(imglabel);
       labelstatistics->Update();
 
       typedef typename LabelStatisticsImageFilterType::ValidLabelValuesContainerType ValidLabelValuesType;
@@ -202,14 +220,18 @@ ScalarImageToIntensitySizeListSampleFilter< TInputImage >
       //Get each label and insert it into the list sample
       for(ValidLabelsIteratorType vIt = validlabels.begin(); vIt != validlabels.end(); ++vIt){
 
-        if ( labelstatistics->HasLabel(*vIt) ){
-            LabelPixelType labelValue = *vIt;
-            int size = labelstatistics->GetCount( labelValue );
+          LabelPixelType labelValue = *vIt;
+        if ( labelstatistics->HasLabel(labelValue) && labelValue != 0){
 
-            MeasurementVectorType mv;
-            mv[0] = (InputImagePixelType)(minintensity + maxintensity)/2.0;
-            mv[1] = size;
-            output->PushBack(mv);
+            double size = labelstatistics->GetCount( labelValue );
+            if(this->GetMinSize() <= size && size <= this->GetMaxSize()){
+                double bincenter = (minintensity + maxintensity)/2.0;
+
+                MeasurementVectorType mv;
+                mv[0] = bincenter;
+                mv[1] = size;
+                output->PushBack(mv);
+            }
 
 //            std::cout << "min: " << labelstatistics->GetMinimum( labelValue ) << std::endl;
 //            std::cout << "max: " << labelstatistics->GetMaximum( labelValue ) << std::endl;
@@ -226,11 +248,6 @@ ScalarImageToIntensitySizeListSampleFilter< TInputImage >
 
   }
 
-
-
-
-
-
 }
 
 template< typename TInputImage >
@@ -245,6 +262,9 @@ ScalarImageToIntensitySizeListSampleFilter< TInputImage >
     os << indent << "MaxIntensity: "<<m_MaxIntensity<<endl;
     os << indent << "BackgroundValue: "<< m_BackgroundValue <<endl;
     os << indent << "NumberOfIntensityBins: "<< m_NumberOfIntensityBins <<endl;
+
+    os << indent << "MinSize: "<< m_MinSize <<endl;
+    os << indent << "MaxSize: "<< m_MaxSize <<endl;
 }
 
 }// namespace statistics
