@@ -4,7 +4,7 @@
 
 #include <itkImageFileReader.h>
 
-#include <itkScalarImageToIntensitySizeRunLengthFeaturesFilter.h>
+#include "itkScalarImageToIntensitySizeRunLengthFeaturesFilter.h"
 
 using namespace std;
 
@@ -98,17 +98,27 @@ using namespace std;
   }
 
   ostringstream os;
-  os<<"ShortRunEmphasis, ";
-  os<<"LongRunEmphasis, ";
-  os<<"GreyLevelNonuniformity, ";
-  os<<"RunLengthNonuniformity, ";
-  os<<"LowGreyLevelRunEmphasis, ";
-  os<<"HighGreyLevelRunEmphasis, ";
-  os<<"ShortRunLowGreyLevelEmphasis, ";
-  os<<"ShortRunHighGreyLevelEmphasis, ";
-  os<<"LongRunLowGreyLevelEmphasis, ";
-  os<<"LongRunHighGreyLevelEmphasis "<<endl;
 
+  const string OutputNames[] = {"ShortRunEmphasis",
+          "LongRunEmphasis",
+          "GreyLevelNonuniformity",
+          "RunLengthNonuniformity",
+          "LowGreyLevelRunEmphasis",
+          "HighGreyLevelRunEmphasis",
+          "ShortRunLowGreyLevelEmphasis",
+          "ShortRunHighGreyLevelEmphasis",
+          "LongRunLowGreyLevelEmphasis",
+          "LongRunHighGreyLevelEmphasis"};
+
+  os<<"MetricName, ";
+
+  vector<string> OutputNamesVector(OutputNames, end(OutputNames));
+  for(unsigned i = 0; i < OutputNamesVector.size(); i++){
+      os<<OutputNames[i]<<", ";
+  }
+  os<<endl;
+
+  os<<"Value, ";
   os<<imgtorunlegth->GetShortRunEmphasis()<<", ";
   os<<imgtorunlegth->GetLongRunEmphasis()<<", ";
   os<<imgtorunlegth->GetGreyLevelNonuniformity()<<", ";
