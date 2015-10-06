@@ -105,6 +105,8 @@ public:
     itkSetMacro(NumberOfSizeBins, int)
     itkGetMacro(NumberOfSizeBins, int)
 
+    itkSetMacro(UseDynamicThreshold, bool)
+    itkGetMacro(UseDynamicThreshold, bool)
 
     //OUTPUTS
 
@@ -137,7 +139,6 @@ public:
 
     itkGetMacro(LongRunHighGreyLevelEmphasis, MeasurementType)
     itkSetMacro(LongRunHighGreyLevelEmphasis, MeasurementType)
-
 
     ostream* GetHistogramOutput(){
         return &m_HistogramOutput;
@@ -175,6 +176,7 @@ private:
   int m_MinSize;
   int m_MaxSize;
   bool m_UseMinMaxSize;
+  bool m_UseDynamicThreshold;
 
   InputImagePixelType m_BackgroundValue;
   int m_NumberOfIntensityBins;

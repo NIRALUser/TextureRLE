@@ -193,21 +193,21 @@ ScalarImageToIntensitySizeListSampleFilter< TInputImage >
       OutputImagePointerType imgthresh = thresholdfilter->GetOutput();
 
       //Calculate the connected components and label each one of them with a unique value
-      typename ConnectedComponentImageFilterType::Pointer connectedcomponents = ConnectedComponentImageFilterType::New();
+      ConnectedComponentImageFilterPointerType connectedcomponents = ConnectedComponentImageFilterType::New();
       connectedcomponents->SetInput(imgthresh);
 
       OutputImagePointerType imglabel = connectedcomponents->GetOutput();
 
-      typedef itk::ImageFileWriter< OutputImageType > ImageFileWriterType;
-      typename ImageFileWriterType::Pointer writer = ImageFileWriterType::New();
-      writer->SetInput(imglabel);
-      writer->SetFileName("temp.nrrd");
-      writer->Update();
+//      typedef itk::ImageFileWriter< OutputImageType > ImageFileWriterType;
+//      typename ImageFileWriterType::Pointer writer = ImageFileWriterType::New();
+//      writer->SetInput(imglabel);
+//      writer->SetFileName("temp.nrrd");
+//      writer->Update();
 
       //Compute statistics for each label
       LabelStatisticsImageFilterPointerType labelstatistics = LabelStatisticsImageFilterType::New();
       labelstatistics->SetLabelInput(imglabel);
-      labelstatistics->SetInput(imglabel);
+      labelstatistics->SetInput(imgthresh);
       labelstatistics->Update();
 
       typedef typename LabelStatisticsImageFilterType::ValidLabelValuesContainerType ValidLabelValuesType;

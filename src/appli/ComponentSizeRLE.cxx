@@ -34,6 +34,7 @@ using namespace std;
       cout << "\t Maximum size: " <<maxSize<<endl;
   }
   cout << "Number of size bins: "<< numberOfSizeBins <<endl;
+  cout << "Using dynamic threshold: "<< useDynamicThreshold <<endl;
 
 
 
@@ -81,6 +82,7 @@ using namespace std;
       }
   }
 
+  imgtorunlegth->SetUseDynamicThreshold(useDynamicThreshold);
   imgtorunlegth->Update();
 
   ostringstream* outhisto = (ostringstream*)imgtorunlegth->GetHistogramOutput();

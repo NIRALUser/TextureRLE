@@ -69,6 +69,14 @@
     </integer>
 
     <boolean>
+      <name>useDynamicThreshold</name>
+      <longflag>useDynamicThreshold</longflag>
+      <description>Compute a dynamic threshold around each pixel, Threshold_i = Pixel_i '+-' BinSize / 2.0 </description>
+      <label>Dynamic threshold</label>
+      <default>0</default>
+    </boolean>
+
+    <boolean>
       <name>useMinMaxSize</name>
       <longflag>useMinMaxSize</longflag>
       <description>Compute the minimum and maximum size of the component. Defaults to compute the minimum and maximum size</description>
@@ -99,6 +107,8 @@
       <label>Max intensity</label>
       <default>16</default>
     </integer>
+
+
 
   </parameters>
 
