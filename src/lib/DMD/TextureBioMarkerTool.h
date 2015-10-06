@@ -51,28 +51,3 @@
 #define RUN_LENGTH_MATRIX
 #define E_CONSTANT 2.71828
 #define COOCURRENCE_MATRIX
-
-#include "DMDT2Fitting.h"
-#include "DMDCalib.h"
-#include "itkImageFileReader.h"
-#include "itkImageFileWriter.h"
-#include "itkImage.h"
-#include "itkTransformFileReader.h"
-#include "itkAffineTransform.h"
-#include "itkTransformFactory.h"
-#include "itkResampleImageFilter.h"
-#include "itkDivideImageFilter.h"
-#include "TextureFeatureCal.h"
-#include "DMDCurveFit.h"
-#include <itksys/Process.h>
-
-#include <algorithm>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>      /* need functions 'toupper' and tolower'   */
-#include <float.h>      /* defines LDBL_MAX*/
-#include <math.h>
-#include <time.h>       /* for date marking of output data files   */
-
-

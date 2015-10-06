@@ -61,14 +61,14 @@ endif()
 #include(${QT_USE_FILE})
 
 option(USE_SYSTEM_ITK "Build using an externally defined version of ITK" OFF)
-#option(USE_SYSTEM_SlicerExecutionModel "Build using an externally defined version of SlicerExecutionModel"  OFF)
+option(USE_SYSTEM_SlicerExecutionModel "Build using an externally defined version of SlicerExecutionModel"  OFF)
 option(USE_SYSTEM_VTK "Build using an externally defined version of VTK" OFF)
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 #------------------------------------------------------------------------------
 # ${LOCAL_PROJECT_NAME} dependency list
 #------------------------------------------------------------------------------
 
-set(${LOCAL_PROJECT_NAME}_DEPENDENCIES ITKv4 VTK)
+set(${LOCAL_PROJECT_NAME}_DEPENDENCIES ITKv4 VTK SlicerExecutionModel)
 
 
 #-----------------------------------------------------------------------------
@@ -172,6 +172,7 @@ list(APPEND ${CMAKE_PROJECT_NAME}_SUPERBUILD_EP_VARS
   ITK_DIR:PATH
   VTK_DIR:PATH
   VTK_VERSION_MAJOR:STRING
+  SlicerExecutionModel_DIR:PATH
   )
 
 _expand_external_project_vars()
