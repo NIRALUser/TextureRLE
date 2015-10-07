@@ -88,7 +88,7 @@ using namespace std;
   ostringstream* outhisto = (ostringstream*)imgtorunlegth->GetHistogramOutput();
 
   if(outputHistogramCSV.compare("") != 0){
-      ofstream outhistofile(outputHistogramCSV);
+      ofstream outhistofile(outputHistogramCSV.c_str());
       if(outhistofile.is_open()){
           outhistofile << outhisto->str();
           outhistofile.close();
@@ -136,11 +136,15 @@ using namespace std;
   if(outputRLE.compare("") != 0){
       ofstream outputrlefile;
       if(outputRLE.compare(outputHistogramCSV) == 0){
-          outputrlefile.open(outputRLE, ofstream::out|ofstream::app);
+          outputrlefile.open(outputRLE.c_str(), ofstream::out|ofstream::app);
       }else{
-          outputrlefile.open(outputRLE);
+          outputrlefile.open(outputRLE.c_str());
       }
-      outputrlefile<< os.str()<<endl;
+      if(outputrlefile.is_open()){
+        outputrlefile<< os.str()<<endl;
+      }else{
+          cout<<"Could not create file: "<<outputRLE<<endl;
+      }
   }else{
       cout<<os.str()<<endl;
   }

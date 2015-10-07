@@ -136,8 +136,13 @@ using namespace std;
 
   if(outputRLE.compare("") != 0){
       ofstream outputrlefile;
-      outputrlefile.open(outputRLE);
-      outputrlefile<< os.str()<<endl;
+      outputrlefile.open(outputRLE.c_str());
+      if(outputrlefile.is_open()){
+          outputrlefile<< os.str()<<endl;
+      }else{
+          cout<<"Could not create file: "<<outputRLE<<endl;
+      }
+
   }else{
       cout<<os.str()<<endl;
   }
