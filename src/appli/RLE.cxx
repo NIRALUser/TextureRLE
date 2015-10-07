@@ -73,11 +73,10 @@ using namespace std;
   typedef itk::Neighborhood< InputImageType::PixelType, dimension> NeighborhoodType;
   NeighborhoodType hood;
   hood.SetRadius( 1 );
-  unsigned int centerIndex = hood.GetCenterNeighborhoodIndex();
+
   ScalarImageToRunLengthFeaturesFilterType::OffsetVectorPointer offsets = ScalarImageToRunLengthFeaturesFilterType::OffsetVector::New();
 
   int ind[] = {0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12};
-
   vector<int> offsetindex(ind, ind + (sizeof(ind)/sizeof(*ind)));
 
   if(connected6){

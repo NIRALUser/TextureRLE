@@ -164,6 +164,7 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
 
   //Compute min max intensity of the image
   if(!(this->GetUseMinMaxIntensity())){
+      cout<<"Calculating the min max intensity in the image..."<<endl;
       InputImageRegionIteratorType it(inputImage, inputImage->GetLargestPossibleRegion());
       InputImagePixelType minvalue = numeric_limits< InputImagePixelType >::max();
       InputImagePixelType maxvalue = numeric_limits< InputImagePixelType >::min();
@@ -179,8 +180,12 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
           }
           ++it;
       }
-      this->SetMinIntensity(minvalue);
-      this->SetMaxIntensity(maxvalue);
+      InputImagePixelType temp = minvalue + (maxvalue - minvalue)*.01;
+      this->SetMinIntensity(temp);
+      cout<<"\t Min intensity + 1% = "<<temp<<endl;
+      temp = maxvalue - (maxvalue - minvalue)*.01;
+      this->SetMaxIntensity(temp);
+      cout<<"\t Max intensity - 1% = "<<temp<<endl;
   }
 
   //Generate a sample vector.
@@ -192,10 +197,6 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
       runlengthfilter->SetMinIntensity(this->GetMinIntensity());
       runlengthfilter->SetMaxIntensity(this->GetMaxIntensity());
       runlengthfilter->SetNumberOfIntensityBins(this->GetNumberOfIntensityBins());
-      runlengthfilter->SetMinSize(this->GetMinSize());
-      if(this->GetMaxSize() != -1){
-          runlengthfilter->SetMaxSize(this->GetMaxSize());
-      }
       runlengthfilter->SetBackgroundValue(this->GetBackgroundValue());
       runlengthfilter->SetInput(inputImage);
       runlengthfilter->Update();
@@ -206,10 +207,6 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
       runlengthfilter->SetMinIntensity(this->GetMinIntensity());
       runlengthfilter->SetMaxIntensity(this->GetMaxIntensity());
       runlengthfilter->SetNumberOfIntensityBins(this->GetNumberOfIntensityBins());
-      runlengthfilter->SetMinSize(this->GetMinSize());
-      if(this->GetMaxSize() != -1){
-          runlengthfilter->SetMaxSize(this->GetMaxSize());
-      }
       runlengthfilter->SetBackgroundValue(this->GetBackgroundValue());
       runlengthfilter->SetInput(inputImage);
       runlengthfilter->Update();
@@ -217,7 +214,8 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
       sample = const_cast< SampleType* >(runlengthfilter->GetOutput());
   }
 
-  if(this->GetMaxSize() == -1){
+  if(!this->GetUseMinMaxSize()){
+      int min = numeric_limits<int>::max();
       int max = numeric_limits<int>::min();
       cout<<"Calculating the max size of the components..."<<endl;
       for(int i = 0; i < sample->GetTotalFrequency(); i++){
@@ -225,8 +223,18 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
           if(max < val){
               max = val;
           }
+
+          if(min > val){
+              min = val;
+          }
       }
-      this->SetMaxSize(max);
+      int temp = min + (max - min)*.01;
+      this->SetMinSize(temp);
+      cout<<"\t Min size + 1% = "<<temp<<endl;
+
+      temp = max - (max - min)*.01;
+      this->SetMaxSize(temp);
+      cout<<"\t Max size - 1% = "<<temp<<endl;
   }
 
   //Set the bin ranges for the histogram.

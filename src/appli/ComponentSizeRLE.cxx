@@ -95,7 +95,7 @@ using namespace std;
       }else{
           cerr<<"Could not create file: "<<outputHistogramCSV<<endl;
       }
-  }else{
+  }else if(outputHistogramPrint){
       cout<<outhisto->str()<<endl;
   }
 
