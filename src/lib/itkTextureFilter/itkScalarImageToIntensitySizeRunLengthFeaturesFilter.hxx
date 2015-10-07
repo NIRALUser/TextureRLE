@@ -157,6 +157,7 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
   typedef itk::Statistics::ScalarImageToIntensitySizeListSampleFilter< InputImageType > ScalarImageToIntensitySizeListSampleType;
   typedef typename ScalarImageToIntensitySizeListSampleType::Pointer ScalarImageToIntensitySizeListSamplePointerType;
   typedef typename  ScalarImageToIntensitySizeListSampleType::SampleType SampleType;
+  typedef typename SampleType::Pointer SamplePointerType;
 
   typedef itk::Statistics::ScalarImageToConnectedIntensitySizeListSampleFilter< InputImageType > ScalarImageToConnectedIntensitySizeListSampleType;
   typedef typename ScalarImageToConnectedIntensitySizeListSampleType::Pointer ScalarImageToConnectedIntensitySizeListSamplePointerType;
@@ -185,7 +186,7 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
   //Generate a sample vector.
   //The sample vector is generated using the intensity and the size of each component
 
-  SampleType* sample = 0;
+  SamplePointerType sample;
   if(!this->GetUseDynamicThreshold()){
       ScalarImageToIntensitySizeListSamplePointerType runlengthfilter = ScalarImageToIntensitySizeListSampleType::New();
       runlengthfilter->SetMinIntensity(this->GetMinIntensity());

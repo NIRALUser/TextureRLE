@@ -77,16 +77,17 @@ using namespace std;
   ScalarImageToRunLengthFeaturesFilterType::OffsetVectorPointer offsets = ScalarImageToRunLengthFeaturesFilterType::OffsetVector::New();
 
   int ind[] = {0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12};
-  vector<int> offsetindex(ind, end(ind));
+
+  vector<int> offsetindex(ind, ind + (sizeof(ind)/sizeof(*ind)));
 
   if(connected6){
       int ind[] = {4, 10, 12};
-      offsetindex = vector<int>(ind, end(ind));
+      offsetindex = vector<int>(ind, ind + (sizeof(ind)/sizeof(*ind)));
   }
 
   if(connected18){
       int ind[] = {1, 3, 4, 5, 7, 9, 10, 11, 12};
-      offsetindex = vector<int>(ind, end(ind));
+      offsetindex = vector<int>(ind, ind + (sizeof(ind)/sizeof(*ind)));
   }
 
   for( unsigned int d = 0; d < offsetindex.size(); d++ ){

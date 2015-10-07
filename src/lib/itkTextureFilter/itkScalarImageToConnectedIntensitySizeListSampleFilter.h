@@ -83,7 +83,7 @@ public:
     const InputImageType * GetInput(unsigned int idx) const;
 
 
-    const SampleType * GetOutput() const;
+    const SampleType* GetOutput() const;
 
     itkSetMacro(MinIntensity, InputImagePixelType)
     itkGetMacro(MinIntensity, InputImagePixelType)

@@ -128,13 +128,12 @@ ScalarImageToConnectedIntensitySizeListSampleFilter< TInputImage >::GenerateOutp
 }
 
 template< typename TImage >
-const typename ScalarImageToConnectedIntensitySizeListSampleFilter< TImage >::SampleType *
+const typename ScalarImageToConnectedIntensitySizeListSampleFilter< TImage >::SampleType*
 ScalarImageToConnectedIntensitySizeListSampleFilter< TImage >
 ::GetOutput() const
 {
   const SampleType *output =
     static_cast< const SampleType * >( this->ProcessObject::GetOutput(0) );
-
   return output;
 }
 

@@ -114,7 +114,7 @@ using namespace std;
 
   os<<"MetricName, ";
 
-  vector<string> OutputNamesVector(OutputNames, end(OutputNames));
+  vector<string> OutputNamesVector(OutputNames, OutputNames + (sizeof(OutputNames)/sizeof(*OutputNames)));
   for(unsigned i = 0; i < OutputNamesVector.size(); i++){
       os<<OutputNames[i]<<", ";
   }
