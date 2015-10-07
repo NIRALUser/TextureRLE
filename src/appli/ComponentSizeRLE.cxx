@@ -101,7 +101,14 @@ using namespace std;
 
   ostringstream os;
 
-  const string OutputNames[] = {"ShortRunEmphasis",
+  const string OutputNames[] = {
+          "MinIntensity",
+          "MaxIntensity",
+          "NumberOfIntensityBins",
+          "MinSize",
+          "MaxSize",
+          "NumberOfSizeBins",
+          "ShortRunEmphasis",
           "LongRunEmphasis",
           "GreyLevelNonuniformity",
           "RunLengthNonuniformity",
@@ -110,7 +117,8 @@ using namespace std;
           "ShortRunLowGreyLevelEmphasis",
           "ShortRunHighGreyLevelEmphasis",
           "LongRunLowGreyLevelEmphasis",
-          "LongRunHighGreyLevelEmphasis"};
+          "LongRunHighGreyLevelEmphasis"
+  };
 
   os<<"MetricName, ";
 
@@ -121,6 +129,12 @@ using namespace std;
   os<<endl;
 
   os<<"Value, ";
+  os<<imgtorunlegth->GetMinIntensity()<<", ";
+  os<<imgtorunlegth->GetMaxIntensity()<<", ";
+  os<<imgtorunlegth->GetNumberOfIntensityBins()<<", ";
+  os<<imgtorunlegth->GetMinSize()<<", ";
+  os<<imgtorunlegth->GetMaxSize()<<", ";
+  os<<imgtorunlegth->GetNumberOfSizeBins()<<", ";
   os<<imgtorunlegth->GetShortRunEmphasis()<<", ";
   os<<imgtorunlegth->GetLongRunEmphasis()<<", ";
   os<<imgtorunlegth->GetGreyLevelNonuniformity()<<", ";
