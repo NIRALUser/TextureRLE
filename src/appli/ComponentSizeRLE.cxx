@@ -102,6 +102,7 @@ using namespace std;
   ostringstream os;
 
   const string OutputNames[] = {
+          "Input,"
           "MinIntensity",
           "MaxIntensity",
           "NumberOfIntensityBins",
@@ -120,15 +121,13 @@ using namespace std;
           "LongRunHighGreyLevelEmphasis"
   };
 
-  os<<"MetricName, ";
-
   vector<string> OutputNamesVector(OutputNames, OutputNames + (sizeof(OutputNames)/sizeof(*OutputNames)));
   for(unsigned i = 0; i < OutputNamesVector.size(); i++){
       os<<OutputNames[i]<<", ";
   }
   os<<endl;
 
-  os<<"Value, ";
+  os<<inputVolume<<", ";
   os<<imgtorunlegth->GetMinIntensity()<<", ";
   os<<imgtorunlegth->GetMaxIntensity()<<", ";
   os<<imgtorunlegth->GetNumberOfIntensityBins()<<", ";
