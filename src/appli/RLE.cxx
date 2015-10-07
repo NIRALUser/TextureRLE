@@ -104,6 +104,8 @@ using namespace std;
 
   ostringstream os;
 
+  //WARNING! this should be the same size as the featuresnames number of elements. If you are reading this because the
+  //program crashed, then something changed in the filter. Check the number of produced outputs.
   const string OutputNames[] = {"ShortRunEmphasis",
           "LongRunEmphasis",
           "GreyLevelNonuniformity",

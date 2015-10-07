@@ -62,7 +62,7 @@ public:
 
     typedef itk::ImageRegionConstIterator< InputImageType > InputImageRegionIteratorType;
 
-    typedef itk::Statistics::Histogram< int > HistogramType;
+    typedef itk::Statistics::Histogram< double > HistogramType;
     typedef itk::Statistics::HistogramToRunLengthFeaturesFilter< HistogramType > HistogramToRunLengthFeaturesFilterType;
     typedef typename HistogramToRunLengthFeaturesFilterType::Pointer HistogramToRunLengthFeaturesFilterPointerType;
 
