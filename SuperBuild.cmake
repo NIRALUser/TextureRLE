@@ -68,7 +68,7 @@ option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 # ${LOCAL_PROJECT_NAME} dependency list
 #------------------------------------------------------------------------------
 
-set(${LOCAL_PROJECT_NAME}_DEPENDENCIES ITKv4 VTK SlicerExecutionModel)
+set(${LOCAL_PROJECT_NAME}_DEPENDENCIES ITKv4 SlicerExecutionModel)
 
 
 #-----------------------------------------------------------------------------
