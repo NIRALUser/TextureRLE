@@ -86,7 +86,7 @@ using namespace std;
       maskfilter->SetOutsideValue(backGroundValue);
       maskfilter->Update();
 
-      mapimages[1] = imgin;
+      mapimages[1] = maskfilter->GetOutput();
 
   }else if(inputLabelMap.compare("") != 0){
       typedef itk::ImageFileReader< InputImageType > InputImageFileReaderType;
