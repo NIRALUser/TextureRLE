@@ -24,8 +24,6 @@
 
 #include <itkDataObjectDecorator.h>
 
-#include <itkMaskImageFilter.h>
-
 namespace itk
 {
 namespace Statistics {
@@ -49,7 +47,6 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
     m_NumberOfSizeBins = 16;
 
     m_BackgroundValue = 0;
-    m_InputMask = 0;
 
     this->SetNumberOfRequiredInputs(1);
     this->SetNumberOfRequiredOutputs(1);
@@ -137,22 +134,6 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
 {
 
   InputImageConstPointer inputImage = this->GetInput();
-  InputImageConstPointer inputMask = this->GetInputMask();
-
-  if(inputMask){//If there is a mask then mask all the values in the image
-      typedef itk::MaskImageFilter< InputImageType, InputImageType > MaskImageFilterType;
-      typedef typename MaskImageFilterType::Pointer MaskImageFilterPointerType;
-
-      MaskImageFilterPointerType maskfilter = MaskImageFilterType::New();
-      maskfilter->SetInput(inputImage);
-      maskfilter->SetMaskImage(inputMask);
-      maskfilter->SetMaskingValue(this->GetBackgroundValue());
-      maskfilter->SetOutsideValue(this->GetBackgroundValue());
-      maskfilter->Update();
-
-      inputImage = maskfilter->GetOutput();
-
-  }
 
   typedef itk::Statistics::ScalarImageToIntensitySizeListSampleFilter< InputImageType > ScalarImageToIntensitySizeListSampleType;
   typedef typename ScalarImageToIntensitySizeListSampleType::Pointer ScalarImageToIntensitySizeListSamplePointerType;

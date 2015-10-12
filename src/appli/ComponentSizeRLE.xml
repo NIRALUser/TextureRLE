@@ -24,8 +24,15 @@
       <name>inputMask</name>
       <label>Input Mask</label>
       <channel>input</channel>
-      <description>Input mask</description>
+      <description>Input mask with 0 for background and otherwise for objects.</description>
       <longflag>m</longflag>
+    </image>
+
+    <image>
+      <name>inputLabelMap</name>
+      <label>Input Label map</label>
+      <channel>input</channel>
+      <description>Label map with 0 for background and non 0 labels elsewhere. The RLE analysis is done separately for each label.</description>
     </image>
 
     <double>

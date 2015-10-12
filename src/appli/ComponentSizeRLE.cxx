@@ -3,8 +3,13 @@
 
 
 #include <itkImageFileReader.h>
+#include <itkLabelImageToLabelMapFilter.h>
+#include <itkLabelMapMaskImageFilter.h>
+#include <itkMaskImageFilter.h>
 
 #include "itkScalarImageToIntensitySizeRunLengthFeaturesFilter.h"
+
+
 
 using namespace std;
 
@@ -50,6 +55,18 @@ using namespace std;
   InputImagePointerType imgin = reader->GetOutput();
 
   InputImagePointerType maskin = 0;
+
+  typedef itk::LabelObject< InputPixelType, dimension > LabelObjectType;
+  typedef itk::LabelMap< LabelObjectType > LabelImageType;
+  typedef itk::LabelImageToLabelMapFilter< InputImageType, LabelImageType > LabelImageMapFilterType;
+  LabelImageMapFilterType::Pointer labelmapfilter = LabelImageMapFilterType::New();
+  LabelImageType::Pointer labelmap;
+  LabelImageType::LabelVectorType labels;
+
+  typedef vector<InputImagePointerType> VectorInputImagePointerType;
+
+  VectorInputImagePointerType vectorimages;
+
   if(inputMask.compare("")!=0){
       typedef itk::ImageFileReader< InputImageType > InputImageFileReaderType;
       typedef InputImageFileReaderType::Pointer InputImageFileReaderPointerType;
@@ -58,51 +75,65 @@ using namespace std;
       readermask->SetFileName(inputMask);
       readermask->Update();
       maskin = readermask->GetOutput();
-  }
 
-  typedef itk::Statistics::ScalarImageToIntensitySizeRunLengthFeaturesFilter< InputImageType > ScalarImageToRunLengthIntensitySizeFilterType;
-  ScalarImageToRunLengthIntensitySizeFilterType::Pointer imgtorunlegth = ScalarImageToRunLengthIntensitySizeFilterType::New();
-  imgtorunlegth->SetBackgroundValue(backGroundValue);
-  imgtorunlegth->SetInput(imgin);
-  imgtorunlegth->SetInputMask(maskin);
+      typedef itk::MaskImageFilter< InputImageType, InputImageType > MaskImageFilterType;
+      typedef MaskImageFilterType::Pointer MaskImageFilterPointerType;
 
-  imgtorunlegth->SetNumberOfIntensityBins(numberOfIntensityBins);
-  if(useMinMaxIntensity){
-      imgtorunlegth->SetUseMinMaxIntensity(true);
-      imgtorunlegth->SetMinIntensity(minIntensity);
-      imgtorunlegth->SetMaxIntensity(maxIntensity);
-  }
+      MaskImageFilterPointerType maskfilter = MaskImageFilterType::New();
+      maskfilter->SetInput(imgin);
+      maskfilter->SetMaskImage(maskin);
+      maskfilter->SetMaskingValue(backGroundValue);
+      maskfilter->SetOutsideValue(backGroundValue);
+      maskfilter->Update();
 
-  imgtorunlegth->SetNumberOfSizeBins(numberOfSizeBins);
-  if(useMinMaxSize){
-      imgtorunlegth->SetUseMinMaxSize(true);
-      imgtorunlegth->SetMinSize(minSize);
-      if(maxSize != -1){
-          imgtorunlegth->SetMaxSize(maxSize);
+      vectorimages.push_back(imgin);
+      labels.push_back(1);
+
+  }else if(inputLabelMap.compare("") != 0){
+      typedef itk::ImageFileReader< InputImageType > InputImageFileReaderType;
+      typedef InputImageFileReaderType::Pointer InputImageFileReaderPointerType;
+      typedef itk::LabelMapMaskImageFilter< LabelImageType, InputImageType > LabelMapMaskImageFilterType;
+
+      InputImageFileReaderPointerType readerlm = InputImageFileReaderType::New();
+
+      InputImagePointerType labelimage = 0;
+
+      readerlm->SetFileName(inputLabelMap);
+      readerlm->Update();
+      labelimage = readerlm->GetOutput();
+
+      labelmapfilter->SetInput(labelimage);
+      labelmapfilter->Update();
+      labelmap = labelmapfilter->GetOutput();
+
+      labels = labelmap->GetLabels();
+      for(unsigned i = 0; i < labels.size(); i++){
+          InputPixelType currentlabel = labels[i];
+          if(currentlabel != backGroundValue){
+
+              LabelMapMaskImageFilterType::Pointer labelmaskfilter = LabelMapMaskImageFilterType::New();
+              labelmaskfilter->SetInput( labelmap );
+              labelmaskfilter->SetFeatureImage( imgin );
+              labelmaskfilter->SetBackgroundValue( backGroundValue );
+              labelmaskfilter->SetLabel(currentlabel);
+              labelmaskfilter->CropOn();
+              labelmaskfilter->Update();
+
+              vectorimages.push_back(labelmaskfilter->GetOutput());
+          }
       }
+  }else{
+      vectorimages.push_back(imgin);
   }
 
-  imgtorunlegth->SetUseDynamicThreshold(useDynamicThreshold);
-  imgtorunlegth->Update();
 
-  ostringstream* outhisto = (ostringstream*)imgtorunlegth->GetHistogramOutput();
-
-  if(outputHistogramCSV.compare("") != 0){
-      ofstream outhistofile(outputHistogramCSV.c_str());
-      if(outhistofile.is_open()){
-          outhistofile << outhisto->str();
-          outhistofile.close();
-      }else{
-          cerr<<"Could not create file: "<<outputHistogramCSV<<endl;
-      }
-  }else if(outputHistogramPrint){
-      cout<<outhisto->str()<<endl;
-  }
+  ostringstream outhisto;
 
   ostringstream os;
 
   const string OutputNames[] = {
-          "Input,"
+          "Input",
+          "Label",
           "MinIntensity",
           "MaxIntensity",
           "NumberOfIntensityBins",
@@ -121,29 +152,77 @@ using namespace std;
           "LongRunHighGreyLevelEmphasis"
   };
 
+
+  for(unsigned i = 0; i < vectorimages.size(); i++){
+      typedef itk::Statistics::ScalarImageToIntensitySizeRunLengthFeaturesFilter< InputImageType > ScalarImageToRunLengthIntensitySizeFilterType;
+      ScalarImageToRunLengthIntensitySizeFilterType::Pointer imgtorunlegth = ScalarImageToRunLengthIntensitySizeFilterType::New();
+      imgtorunlegth->SetBackgroundValue(backGroundValue);
+      imgtorunlegth->SetInput(vectorimages[i]);
+
+      imgtorunlegth->SetNumberOfIntensityBins(numberOfIntensityBins);
+      if(useMinMaxIntensity){
+          imgtorunlegth->SetUseMinMaxIntensity(true);
+          imgtorunlegth->SetMinIntensity(minIntensity);
+          imgtorunlegth->SetMaxIntensity(maxIntensity);
+      }
+
+      imgtorunlegth->SetNumberOfSizeBins(numberOfSizeBins);
+      if(useMinMaxSize){
+          imgtorunlegth->SetUseMinMaxSize(true);
+          imgtorunlegth->SetMinSize(minSize);
+          if(maxSize != -1){
+              imgtorunlegth->SetMaxSize(maxSize);
+          }
+      }
+
+      imgtorunlegth->SetUseDynamicThreshold(useDynamicThreshold);
+      imgtorunlegth->Update();
+
+      outhisto << ((ostringstream*)imgtorunlegth->GetHistogramOutput());
+
+      os<<inputVolume<<", ";
+      if(labels.size() > i){
+          os<<labels[i]<<", ";
+      }
+      os<<imgtorunlegth->GetMinIntensity()<<", ";
+      os<<imgtorunlegth->GetMaxIntensity()<<", ";
+      os<<imgtorunlegth->GetNumberOfIntensityBins()<<", ";
+      os<<imgtorunlegth->GetMinSize()<<", ";
+      os<<imgtorunlegth->GetMaxSize()<<", ";
+      os<<imgtorunlegth->GetNumberOfSizeBins()<<", ";
+      os<<imgtorunlegth->GetShortRunEmphasis()<<", ";
+      os<<imgtorunlegth->GetLongRunEmphasis()<<", ";
+      os<<imgtorunlegth->GetGreyLevelNonuniformity()<<", ";
+      os<<imgtorunlegth->GetRunLengthNonuniformity()<<", ";
+      os<<imgtorunlegth->GetLowGreyLevelRunEmphasis()<<", ";
+      os<<imgtorunlegth->GetHighGreyLevelRunEmphasis()<<", ";
+      os<<imgtorunlegth->GetShortRunLowGreyLevelEmphasis()<<", ";
+      os<<imgtorunlegth->GetShortRunHighGreyLevelEmphasis()<<", ";
+      os<<imgtorunlegth->GetLongRunLowGreyLevelEmphasis()<<", ";
+      os<<imgtorunlegth->GetLongRunHighGreyLevelEmphasis()<<endl;
+  }
+
+
+
+  if(outputHistogramCSV.compare("") != 0){
+      ofstream outhistofile(outputHistogramCSV.c_str());
+      if(outhistofile.is_open()){
+          outhistofile << outhisto.str();
+          outhistofile.close();
+      }else{
+          cerr<<"Could not create file: "<<outputHistogramCSV<<endl;
+      }
+  }else if(outputHistogramPrint){
+      cout<<outhisto.str()<<endl;
+  }
+
+
+
   vector<string> OutputNamesVector(OutputNames, OutputNames + (sizeof(OutputNames)/sizeof(*OutputNames)));
   for(unsigned i = 0; i < OutputNamesVector.size(); i++){
       os<<OutputNames[i]<<", ";
   }
   os<<endl;
-
-  os<<inputVolume<<", ";
-  os<<imgtorunlegth->GetMinIntensity()<<", ";
-  os<<imgtorunlegth->GetMaxIntensity()<<", ";
-  os<<imgtorunlegth->GetNumberOfIntensityBins()<<", ";
-  os<<imgtorunlegth->GetMinSize()<<", ";
-  os<<imgtorunlegth->GetMaxSize()<<", ";
-  os<<imgtorunlegth->GetNumberOfSizeBins()<<", ";
-  os<<imgtorunlegth->GetShortRunEmphasis()<<", ";
-  os<<imgtorunlegth->GetLongRunEmphasis()<<", ";
-  os<<imgtorunlegth->GetGreyLevelNonuniformity()<<", ";
-  os<<imgtorunlegth->GetRunLengthNonuniformity()<<", ";
-  os<<imgtorunlegth->GetLowGreyLevelRunEmphasis()<<", ";
-  os<<imgtorunlegth->GetHighGreyLevelRunEmphasis()<<", ";
-  os<<imgtorunlegth->GetShortRunLowGreyLevelEmphasis()<<", ";
-  os<<imgtorunlegth->GetShortRunHighGreyLevelEmphasis()<<", ";
-  os<<imgtorunlegth->GetLongRunLowGreyLevelEmphasis()<<", ";
-  os<<imgtorunlegth->GetLongRunHighGreyLevelEmphasis()<<endl;
 
 
   if(outputRLE.compare("") != 0){

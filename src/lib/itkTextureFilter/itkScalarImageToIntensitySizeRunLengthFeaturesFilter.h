@@ -82,8 +82,6 @@ public:
     const InputImageType * GetInput() const;
     const InputImageType * GetInput(unsigned int idx) const;
 
-    itkSetMacro(InputMask, InputImagePointer)
-    itkGetMacro(InputMask, InputImageConstPointer)
     itkSetMacro(BackgroundValue, InputImagePixelType)
     itkGetMacro(BackgroundValue, InputImagePixelType)
 
@@ -166,8 +164,6 @@ protected:
 private:
   ScalarImageToIntensitySizeRunLengthFeaturesFilter(const Self &); //purposely not implemented
   void operator=(const Self &);                //purposely not implemented
-
-  InputImageConstPointer m_InputMask;
 
   InputImagePixelType m_MinIntensity;
   InputImagePixelType m_MaxIntensity;
