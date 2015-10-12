@@ -143,9 +143,9 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
   typedef itk::Statistics::ScalarImageToConnectedIntensitySizeListSampleFilter< InputImageType > ScalarImageToConnectedIntensitySizeListSampleType;
   typedef typename ScalarImageToConnectedIntensitySizeListSampleType::Pointer ScalarImageToConnectedIntensitySizeListSamplePointerType;
 
-  //Compute min max intensity of the image
+  //Compute min max intensity of the labeled region
   if(!(this->GetUseMinMaxIntensity())){
-      cout<<"Calculating the min max intensity in the image..."<<endl;
+      cout<<"Calculating the min max intensity..."<<endl;
       InputImageRegionIteratorType it(inputImage, inputImage->GetLargestPossibleRegion());
       InputImagePixelType minvalue = numeric_limits< InputImagePixelType >::max();
       InputImagePixelType maxvalue = numeric_limits< InputImagePixelType >::min();
@@ -298,13 +298,12 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
   this->SetLongRunEmphasis(histogramtorunlength->GetLongRunEmphasis());
   this->SetGreyLevelNonuniformity(histogramtorunlength->GetGreyLevelNonuniformity());
   this->SetRunLengthNonuniformity(histogramtorunlength->GetRunLengthNonuniformity());
-  this->SetLongRunLowGreyLevelEmphasis(histogramtorunlength->GetLowGreyLevelRunEmphasis());
+  this->SetLowGreyLevelRunEmphasis(histogramtorunlength->GetLowGreyLevelRunEmphasis());
   this->SetHighGreyLevelRunEmphasis(histogramtorunlength->GetHighGreyLevelRunEmphasis());
-  this->SetLowGreyLevelRunEmphasis(histogramtorunlength->GetShortRunLowGreyLevelEmphasis());
-  this->SetGreyLevelNonuniformity(histogramtorunlength->GetShortRunHighGreyLevelEmphasis());
+  this->SetShortRunLowGreyLevelEmphasis(histogramtorunlength->GetShortRunLowGreyLevelEmphasis());
+  this->SetShortRunHighGreyLevelEmphasis(histogramtorunlength->GetShortRunHighGreyLevelEmphasis());
   this->SetLongRunLowGreyLevelEmphasis(histogramtorunlength->GetLongRunLowGreyLevelEmphasis());
   this->SetLongRunHighGreyLevelEmphasis(histogramtorunlength->GetLongRunHighGreyLevelEmphasis());
-
 
 }
 

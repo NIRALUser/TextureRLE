@@ -63,9 +63,9 @@ using namespace std;
   LabelImageType::Pointer labelmap;
   LabelImageType::LabelVectorType labels;
 
-  typedef vector<InputImagePointerType> VectorInputImagePointerType;
+  typedef map<InputPixelType, InputImagePointerType> MapInputImagePointerType;
 
-  VectorInputImagePointerType vectorimages;
+  MapInputImagePointerType mapimages;
 
   if(inputMask.compare("")!=0){
       typedef itk::ImageFileReader< InputImageType > InputImageFileReaderType;
@@ -86,8 +86,7 @@ using namespace std;
       maskfilter->SetOutsideValue(backGroundValue);
       maskfilter->Update();
 
-      vectorimages.push_back(imgin);
-      labels.push_back(1);
+      mapimages[1] = imgin;
 
   }else if(inputLabelMap.compare("") != 0){
       typedef itk::ImageFileReader< InputImageType > InputImageFileReaderType;
@@ -109,6 +108,7 @@ using namespace std;
       labels = labelmap->GetLabels();
       for(unsigned i = 0; i < labels.size(); i++){
           InputPixelType currentlabel = labels[i];
+
           if(currentlabel != backGroundValue){
 
               LabelMapMaskImageFilterType::Pointer labelmaskfilter = LabelMapMaskImageFilterType::New();
@@ -119,11 +119,11 @@ using namespace std;
               labelmaskfilter->CropOn();
               labelmaskfilter->Update();
 
-              vectorimages.push_back(labelmaskfilter->GetOutput());
+              mapimages[currentlabel] = labelmaskfilter->GetOutput();
           }
       }
   }else{
-      vectorimages.push_back(imgin);
+    mapimages[1] = imgin;
   }
 
 
@@ -152,12 +152,17 @@ using namespace std;
           "LongRunHighGreyLevelEmphasis"
   };
 
+  vector<string> OutputNamesVector(OutputNames, OutputNames + (sizeof(OutputNames)/sizeof(*OutputNames)));
+  for(unsigned i = 0; i < OutputNamesVector.size(); i++){
+      os<<OutputNames[i]<<", ";
+  }
+  os<<endl;
 
-  for(unsigned i = 0; i < vectorimages.size(); i++){
+  for(MapInputImagePointerType::iterator iter = mapimages.begin(); iter != mapimages.end(); ++iter){
       typedef itk::Statistics::ScalarImageToIntensitySizeRunLengthFeaturesFilter< InputImageType > ScalarImageToRunLengthIntensitySizeFilterType;
       ScalarImageToRunLengthIntensitySizeFilterType::Pointer imgtorunlegth = ScalarImageToRunLengthIntensitySizeFilterType::New();
       imgtorunlegth->SetBackgroundValue(backGroundValue);
-      imgtorunlegth->SetInput(vectorimages[i]);
+      imgtorunlegth->SetInput(iter->second);
 
       imgtorunlegth->SetNumberOfIntensityBins(numberOfIntensityBins);
       if(useMinMaxIntensity){
@@ -181,9 +186,7 @@ using namespace std;
       outhisto << ((ostringstream*)imgtorunlegth->GetHistogramOutput());
 
       os<<inputVolume<<", ";
-      if(labels.size() > i){
-          os<<labels[i]<<", ";
-      }
+      os<<iter->first<<", ";
       os<<imgtorunlegth->GetMinIntensity()<<", ";
       os<<imgtorunlegth->GetMaxIntensity()<<", ";
       os<<imgtorunlegth->GetNumberOfIntensityBins()<<", ";
@@ -202,8 +205,6 @@ using namespace std;
       os<<imgtorunlegth->GetLongRunHighGreyLevelEmphasis()<<endl;
   }
 
-
-
   if(outputHistogramCSV.compare("") != 0){
       ofstream outhistofile(outputHistogramCSV.c_str());
       if(outhistofile.is_open()){
@@ -215,14 +216,6 @@ using namespace std;
   }else if(outputHistogramPrint){
       cout<<outhisto.str()<<endl;
   }
-
-
-
-  vector<string> OutputNamesVector(OutputNames, OutputNames + (sizeof(OutputNames)/sizeof(*OutputNames)));
-  for(unsigned i = 0; i < OutputNamesVector.size(); i++){
-      os<<OutputNames[i]<<", ";
-  }
-  os<<endl;
 
 
   if(outputRLE.compare("") != 0){

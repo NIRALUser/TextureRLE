@@ -33,6 +33,7 @@
       <label>Input Label map</label>
       <channel>input</channel>
       <description>Label map with 0 for background and non 0 labels elsewhere. The RLE analysis is done separately for each label.</description>
+      <longflag>l</longflag>
     </image>
 
     <double>
