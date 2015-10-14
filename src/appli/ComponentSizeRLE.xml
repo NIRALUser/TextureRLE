@@ -52,6 +52,14 @@
       <default>0</default>
     </boolean>
 
+    <boolean>
+      <name>computeMinMaxLabel</name>
+      <longflag>computeMinMaxLabel</longflag>
+      <description>Compute a minimum and maximum gray level value for each labeled region. Instead of computing it for all regions at once.</description>
+      <label>Minimum maximum for each label</label>
+      <default>0</default>
+    </boolean>
+
     <double>
       <name>minIntensity</name>
       <longflag>minIntensity</longflag>

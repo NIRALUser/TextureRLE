@@ -33,9 +33,3 @@ LINK_DIRECTORIES(
 add_subdirectory(lib)
 add_subdirectory(appli)
 add_subdirectory(install)
-
-OPTION(BUILD_TEST "Build test ?" OFF)
-IF(BUILD_TEST)
-	add_subdirectory(test)
-ENDIF(BUILD_TEST)
-

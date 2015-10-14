@@ -48,6 +48,8 @@ using namespace std;
   typedef itk::Image< InputPixelType, dimension> InputImageType;
   typedef InputImageType::Pointer InputImagePointerType;
 
+  typedef itk::ImageRegionIterator< InputImageType > ImageRegionIteratorType;
+
   typedef itk::ImageFileReader< InputImageType > InputImageFileReaderType;
   typedef InputImageFileReaderType::Pointer InputImageFileReaderPointerType;
   InputImageFileReaderPointerType reader = InputImageFileReaderType::New();
@@ -66,6 +68,11 @@ using namespace std;
   typedef map<InputPixelType, InputImagePointerType> MapInputImagePointerType;
 
   MapInputImagePointerType mapimages;
+
+  if(!useMinMaxIntensity){
+      minIntensity = numeric_limits< double >::max();
+      maxIntensity = numeric_limits< double >::min();
+  }
 
   if(inputMask.compare("")!=0){
       typedef itk::ImageFileReader< InputImageType > InputImageFileReaderType;
@@ -120,7 +127,33 @@ using namespace std;
               labelmaskfilter->Update();
 
               mapimages[currentlabel] = labelmaskfilter->GetOutput();
+
+              if(!computeMinMaxLabel){
+                  ImageRegionIteratorType it(mapimages[currentlabel], mapimages[currentlabel]->GetLargestPossibleRegion());
+                  while(!it.IsAtEnd()){
+                      if(it.Get() != backGroundValue){
+                          if(it.Get() < minIntensity){
+                              minIntensity = it.Get();
+                          }
+                          if(it.Get() > maxIntensity){
+                              maxIntensity = it.Get();
+                          }
+                      }
+                      ++it;
+                  }
+              }
           }
+      }
+
+      if(!computeMinMaxLabel){
+          double tempmin = minIntensity + (maxIntensity - minIntensity)*.01;
+          double tempmax = maxIntensity - (maxIntensity - minIntensity)*.01;
+          minIntensity = tempmin;
+          maxIntensity = tempmax;
+          useMinMaxIntensity = true;
+          cout<<"Computing min and max intensity for all regions..."<<endl;
+          cout<<"\t minIntensity: "<<minIntensity<<endl;
+          cout<<"\t maxIntensity: "<<maxIntensity<<endl;
       }
   }else{
     mapimages[1] = imgin;
