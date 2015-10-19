@@ -163,10 +163,10 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
       }
       InputImagePixelType temp = minvalue + (maxvalue - minvalue)*.01;
       this->SetMinIntensity(temp);
-      cout<<"\t Min intensity + 1% = "<<temp<<endl;
+      cout<<"\t Min intensity + 1% = "<<this->GetMinIntensity()<<endl;
       temp = maxvalue - (maxvalue - minvalue)*.01;
       this->SetMaxIntensity(temp);
-      cout<<"\t Max intensity - 1% = "<<temp<<endl;
+      cout<<"\t Max intensity - 1% = "<<this->GetMaxIntensity()<<endl;
   }
 
   //Generate a sample vector.
@@ -211,11 +211,11 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
       }
       int temp = min + (max - min)*.01;
       this->SetMinSize(temp);
-      cout<<"\t Min size + 1% = "<<temp<<endl;
+      cout<<"\t Min size + 1% = "<<min<<endl;
 
       temp = max - (max - min)*.01;
       this->SetMaxSize(temp);
-      cout<<"\t Max size - 1% = "<<temp<<endl;
+      cout<<"\t Max size - 1% = "<<max<<endl;
   }
 
   //Set the bin ranges for the histogram.
@@ -253,36 +253,32 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
 
   m_HistogramOutput.clear();
 
-  m_HistogramOutput << "BinId, ";
-
   HistogramType::BinMinContainerType mins = histogram->GetMins();
   HistogramType::BinMaxContainerType maxs = histogram->GetMaxs();
 
-  int count = 0;
-  for(unsigned k = 0; k < mins[1].size(); k++){
-      for(unsigned j = 0; j < mins[0].size(); j++){
-          m_HistogramOutput << "[";
-          m_HistogramOutput << mins[0][j];
-          m_HistogramOutput << "-";
-          m_HistogramOutput << maxs[0][j];
-          m_HistogramOutput <<"]";
+  //Intensity bins
+  m_HistogramOutput << ",";
+  for(unsigned i = 0; i < mins[0].size(); i++){
+      m_HistogramOutput << "[";
+      m_HistogramOutput << mins[0][i];
+      m_HistogramOutput << "-";
+      m_HistogramOutput << maxs[0][i];
+      m_HistogramOutput <<"]";
+      m_HistogramOutput <<",";
+  }
 
-          m_HistogramOutput << "-";
-
+  unsigned k = 0;
+  for(unsigned int i = 0; i < totalBins; ++i){
+      if(i % mins[1].size() == 0){
+          m_HistogramOutput <<endl;
           m_HistogramOutput << "[";
           m_HistogramOutput << mins[1][k];
           m_HistogramOutput << "-";
           m_HistogramOutput << maxs[1][k];
           m_HistogramOutput <<"]";
           m_HistogramOutput <<",";
-          count++;
+          k++;
       }
-  }
-
-  m_HistogramOutput << endl;
-
-  m_HistogramOutput << "Frequency, ";
-  for(unsigned int i = 0; i < totalBins; ++i){
       m_HistogramOutput << histogram->GetFrequency(i) << ", ";
   }
 

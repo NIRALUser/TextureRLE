@@ -53,9 +53,17 @@
     </boolean>
 
     <boolean>
-      <name>computeMinMaxLabel</name>
-      <longflag>computeMinMaxLabel</longflag>
-      <description>Compute a minimum and maximum gray level value for each labeled region. Instead of computing it for all regions at once.</description>
+      <name>computeMinMaxIntensityPerLabel</name>
+      <longflag>computeMinMaxIntensityPerLabel</longflag>
+      <description>Compute a minimum and maximum gray level value for each labeled region instead of computing it for all regions.</description>
+      <label>Minimum maximum for each label</label>
+      <default>0</default>
+    </boolean>
+
+    <boolean>
+      <name>computeMinMaxSizePerLabel</name>
+      <longflag>computeMinMaxSizePerLabel</longflag>
+      <description>Compute a minimum and maximum component size for each labeled region instead of computing it for all regions.</description>
       <label>Minimum maximum for each label</label>
       <default>0</default>
     </boolean>
@@ -133,8 +141,8 @@
     <description>Output parameters</description>
 
     <string>
-      <name>outputHistogramCSV</name>
-      <longflag>outputHistogramCSV</longflag>
+      <name>outputHistogram</name>
+      <longflag>outputHistogram</longflag>
       <description>Filename to store the histogram in CSV format</description>
       <label>OutputHistogramCSV</label>
       <default></default>

@@ -106,6 +106,9 @@ public:
     itkSetMacro(IntensityBinSize, int)
     itkGetMacro(IntensityBinSize, int)
 
+    itkSetMacro(FullConnectivity, bool)
+    itkGetMacro(FullConnectivity, bool)
+
 protected:
     ScalarImageToConnectedIntensitySizeListSampleFilter();
     ~ScalarImageToConnectedIntensitySizeListSampleFilter(){};
@@ -130,6 +133,8 @@ private:
   int m_MinSize;
   int m_MaxSize;
   int m_IntensityBinSize;
+
+  bool m_FullConnectivity;
 
 };
 

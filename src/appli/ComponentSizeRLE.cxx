@@ -127,33 +127,7 @@ using namespace std;
               labelmaskfilter->Update();
 
               mapimages[currentlabel] = labelmaskfilter->GetOutput();
-
-              if(!computeMinMaxLabel){
-                  ImageRegionIteratorType it(mapimages[currentlabel], mapimages[currentlabel]->GetLargestPossibleRegion());
-                  while(!it.IsAtEnd()){
-                      if(it.Get() != backGroundValue){
-                          if(it.Get() < minIntensity){
-                              minIntensity = it.Get();
-                          }
-                          if(it.Get() > maxIntensity){
-                              maxIntensity = it.Get();
-                          }
-                      }
-                      ++it;
-                  }
-              }
           }
-      }
-
-      if(!computeMinMaxLabel){
-          double tempmin = minIntensity + (maxIntensity - minIntensity)*.01;
-          double tempmax = maxIntensity - (maxIntensity - minIntensity)*.01;
-          minIntensity = tempmin;
-          maxIntensity = tempmax;
-          useMinMaxIntensity = true;
-          cout<<"Computing min and max intensity for all regions..."<<endl;
-          cout<<"\t minIntensity: "<<minIntensity<<endl;
-          cout<<"\t maxIntensity: "<<maxIntensity<<endl;
       }
   }else{
     mapimages[1] = imgin;
@@ -191,7 +165,55 @@ using namespace std;
   }
   os<<endl;
 
+  if((!computeMinMaxIntensityPerLabel || !computeMinMaxSizePerLabel) && mapimages.size() > 1){
+
+      double tempMinIntensity = numeric_limits<double>::max();
+      double tempMaxIntensity = numeric_limits<double>::min();
+      int tempMinSize = numeric_limits<int>::max();
+      int tempMaxSize = numeric_limits<int>::min();
+
+      for(MapInputImagePointerType::iterator iter = mapimages.begin(); iter != mapimages.end(); ++iter){
+          typedef itk::Statistics::ScalarImageToIntensitySizeRunLengthFeaturesFilter< InputImageType > ScalarImageToRunLengthIntensitySizeFilterType;
+          ScalarImageToRunLengthIntensitySizeFilterType::Pointer imgtorunlegth = ScalarImageToRunLengthIntensitySizeFilterType::New();
+          imgtorunlegth->SetBackgroundValue(backGroundValue);
+          imgtorunlegth->SetInput(iter->second);
+          imgtorunlegth->SetNumberOfIntensityBins(numberOfIntensityBins);
+          imgtorunlegth->SetNumberOfSizeBins(numberOfSizeBins);
+          imgtorunlegth->SetUseDynamicThreshold(useDynamicThreshold);
+          imgtorunlegth->Update();
+
+          tempMinIntensity = min(imgtorunlegth->GetMinIntensity(), tempMinIntensity);
+          tempMaxIntensity = max(imgtorunlegth->GetMaxIntensity(), tempMaxIntensity);
+
+          tempMinSize = min(imgtorunlegth->GetMinSize(), tempMinSize);
+          tempMaxSize = max(imgtorunlegth->GetMaxSize(), tempMaxSize);
+      }
+
+      if(!computeMinMaxIntensityPerLabel && !useMinMaxIntensity){
+          useMinMaxIntensity = true;
+          minIntensity = tempMinIntensity;
+          maxIntensity = tempMaxIntensity;
+
+          cout<<"Using minIntensity and maxIntensity from all regions..."<<endl;
+          cout<<"\t minIntensity: "<<minIntensity<<endl;
+          cout<<"\t maxIntensity: "<<maxIntensity<<endl;
+      }
+
+      if(!computeMinMaxSizePerLabel && !useMinMaxSize){
+          useMinMaxSize = true;
+          minSize = tempMinSize;
+          maxSize = tempMaxSize;
+
+          cout<<"Using minSize and maxSize from all regions..."<<endl;
+          cout<<"\t minSize: "<<minSize<<endl;
+          cout<<"\t maxSize: "<<maxSize<<endl;
+      }
+  }
+
   for(MapInputImagePointerType::iterator iter = mapimages.begin(); iter != mapimages.end(); ++iter){
+
+      cout<<endl<<"Label: "<<iter->first<<endl;
+
       typedef itk::Statistics::ScalarImageToIntensitySizeRunLengthFeaturesFilter< InputImageType > ScalarImageToRunLengthIntensitySizeFilterType;
       ScalarImageToRunLengthIntensitySizeFilterType::Pointer imgtorunlegth = ScalarImageToRunLengthIntensitySizeFilterType::New();
       imgtorunlegth->SetBackgroundValue(backGroundValue);
@@ -216,7 +238,7 @@ using namespace std;
       imgtorunlegth->SetUseDynamicThreshold(useDynamicThreshold);
       imgtorunlegth->Update();
 
-      outhisto << ((ostringstream*)imgtorunlegth->GetHistogramOutput());
+      outhisto << ((ostringstream*)imgtorunlegth->GetHistogramOutput())->str();
 
       os<<inputVolume<<", ";
       os<<iter->first<<", ";
@@ -238,13 +260,13 @@ using namespace std;
       os<<imgtorunlegth->GetLongRunHighGreyLevelEmphasis()<<endl;
   }
 
-  if(outputHistogramCSV.compare("") != 0){
-      ofstream outhistofile(outputHistogramCSV.c_str());
+  if(outputHistogram.compare("") != 0){
+      ofstream outhistofile(outputHistogram.c_str());
       if(outhistofile.is_open()){
           outhistofile << outhisto.str();
           outhistofile.close();
       }else{
-          cerr<<"Could not create file: "<<outputHistogramCSV<<endl;
+          cerr<<"Could not create file: "<<outputHistogram<<endl;
       }
   }else if(outputHistogramPrint){
       cout<<outhisto.str()<<endl;
@@ -253,7 +275,7 @@ using namespace std;
 
   if(outputRLE.compare("") != 0){
       ofstream outputrlefile;
-      if(outputRLE.compare(outputHistogramCSV) == 0){
+      if(outputRLE.compare(outputHistogram) == 0){
           outputrlefile.open(outputRLE.c_str(), ofstream::out|ofstream::app);
       }else{
           outputrlefile.open(outputRLE.c_str());
