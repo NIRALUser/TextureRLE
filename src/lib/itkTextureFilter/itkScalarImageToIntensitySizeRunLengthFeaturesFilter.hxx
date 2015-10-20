@@ -17,9 +17,6 @@
 
 #include "itkScalarImageToIntensitySizeRunLengthFeaturesFilter.h"
 
-#include "itkScalarImageToIntensitySizeListSampleFilter.h"
-#include "itkScalarImageToConnectedIntensitySizeListSampleFilter.h"
-#include <itkSampleToHistogramFilter.h>
 #include <itkHistogramToRunLengthFeaturesFilter.h>
 
 #include <itkDataObjectDecorator.h>
@@ -38,6 +35,7 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
     m_MaxIntensity = 0;
     m_UseMinMaxIntensity = false;
     m_UseDynamicThreshold = false;
+    m_FullConnectivity = true;
 
     m_MinSize = 1;
     m_MaxSize = -1;
@@ -47,6 +45,8 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
     m_NumberOfSizeBins = 16;
 
     m_BackgroundValue = 0;
+
+    m_ListSample = 0;
 
     this->SetNumberOfRequiredInputs(1);
     this->SetNumberOfRequiredOutputs(1);
@@ -135,14 +135,6 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
 
   InputImageConstPointer inputImage = this->GetInput();
 
-  typedef itk::Statistics::ScalarImageToIntensitySizeListSampleFilter< InputImageType > ScalarImageToIntensitySizeListSampleType;
-  typedef typename ScalarImageToIntensitySizeListSampleType::Pointer ScalarImageToIntensitySizeListSamplePointerType;
-  typedef typename  ScalarImageToIntensitySizeListSampleType::SampleType SampleType;
-  typedef typename SampleType::Pointer SamplePointerType;
-
-  typedef itk::Statistics::ScalarImageToConnectedIntensitySizeListSampleFilter< InputImageType > ScalarImageToConnectedIntensitySizeListSampleType;
-  typedef typename ScalarImageToConnectedIntensitySizeListSampleType::Pointer ScalarImageToConnectedIntensitySizeListSamplePointerType;
-
   //Compute min max intensity of the labeled region
   if(!(this->GetUseMinMaxIntensity())){
       cout<<"Calculating the min max intensity..."<<endl;
@@ -173,26 +165,34 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
   //The sample vector is generated using the intensity and the size of each component
 
   SamplePointerType sample;
-  if(!this->GetUseDynamicThreshold()){
-      ScalarImageToIntensitySizeListSamplePointerType runlengthfilter = ScalarImageToIntensitySizeListSampleType::New();
-      runlengthfilter->SetMinIntensity(this->GetMinIntensity());
-      runlengthfilter->SetMaxIntensity(this->GetMaxIntensity());
-      runlengthfilter->SetNumberOfIntensityBins(this->GetNumberOfIntensityBins());
-      runlengthfilter->SetBackgroundValue(this->GetBackgroundValue());
-      runlengthfilter->SetInput(inputImage);
-      runlengthfilter->Update();
 
-      sample = const_cast< SampleType* >(runlengthfilter->GetOutput());
+  if(this->GetListSample()){
+      sample = this->GetListSample();
   }else{
-      ScalarImageToConnectedIntensitySizeListSamplePointerType runlengthfilter = ScalarImageToConnectedIntensitySizeListSampleType::New();
-      runlengthfilter->SetMinIntensity(this->GetMinIntensity());
-      runlengthfilter->SetMaxIntensity(this->GetMaxIntensity());
-      runlengthfilter->SetNumberOfIntensityBins(this->GetNumberOfIntensityBins());
-      runlengthfilter->SetBackgroundValue(this->GetBackgroundValue());
-      runlengthfilter->SetInput(inputImage);
-      runlengthfilter->Update();
+      if(!this->GetUseDynamicThreshold()){
+          ScalarImageToIntensitySizeListSamplePointerType runlengthfilter = ScalarImageToIntensitySizeListSampleType::New();
+          runlengthfilter->SetMinIntensity(this->GetMinIntensity());
+          runlengthfilter->SetMaxIntensity(this->GetMaxIntensity());
+          runlengthfilter->SetNumberOfIntensityBins(this->GetNumberOfIntensityBins());
+          runlengthfilter->SetBackgroundValue(this->GetBackgroundValue());
+          runlengthfilter->SetInput(inputImage);
+          runlengthfilter->Update();
 
-      sample = const_cast< SampleType* >(runlengthfilter->GetOutput());
+          sample = const_cast< SampleType* >(runlengthfilter->GetOutput());
+      }else{
+          ScalarImageToConnectedIntensitySizeListSamplePointerType runlengthfilter = ScalarImageToConnectedIntensitySizeListSampleType::New();
+          runlengthfilter->SetMinIntensity(this->GetMinIntensity());
+          runlengthfilter->SetMaxIntensity(this->GetMaxIntensity());
+          runlengthfilter->SetNumberOfIntensityBins(this->GetNumberOfIntensityBins());
+          runlengthfilter->SetBackgroundValue(this->GetBackgroundValue());
+          runlengthfilter->SetFullConnectivity(this->GetFullConnectivity());
+          runlengthfilter->SetInput(inputImage);
+          runlengthfilter->Update();
+
+          sample = const_cast< SampleType* >(runlengthfilter->GetOutput());
+      }
+
+      this->SetListSample(sample);
   }
 
   if(!this->GetUseMinMaxSize()){
@@ -249,7 +249,6 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
   for(unsigned int i = 0; i < size.GetNumberOfElements(); i++){
       totalBins *= histogram->GetSize()[i];
   }
-
 
   m_HistogramOutput.clear();
 

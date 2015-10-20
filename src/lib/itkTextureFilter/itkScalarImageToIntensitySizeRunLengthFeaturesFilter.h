@@ -24,7 +24,10 @@
 #include <itkHistogramToRunLengthFeaturesFilter.h>
 #include <itkMapContainer.h>
 
-#include <itkImageToListSampleFilter.h>
+#include "itkScalarImageToIntensitySizeListSampleFilter.h"
+#include "itkScalarImageToConnectedIntensitySizeListSampleFilter.h"
+#include <itkSampleToHistogramFilter.h>
+
 using namespace std;
 
 namespace itk
@@ -70,6 +73,14 @@ public:
     typedef typename HistogramToRunLengthFeaturesFilterType::MeasurementVectorType MeasurementVectorType;
 
 
+    typedef itk::Statistics::ScalarImageToIntensitySizeListSampleFilter< InputImageType > ScalarImageToIntensitySizeListSampleType;
+    typedef typename ScalarImageToIntensitySizeListSampleType::Pointer ScalarImageToIntensitySizeListSamplePointerType;
+    typedef typename  ScalarImageToIntensitySizeListSampleType::SampleType SampleType;
+    typedef typename SampleType::Pointer SamplePointerType;
+
+    typedef itk::Statistics::ScalarImageToConnectedIntensitySizeListSampleFilter< InputImageType > ScalarImageToConnectedIntensitySizeListSampleType;
+    typedef typename ScalarImageToConnectedIntensitySizeListSampleType::Pointer ScalarImageToConnectedIntensitySizeListSamplePointerType;
+
 
     void PrintSelf(std::ostream & os, Indent indent) const ITK_OVERRIDE;
 
@@ -105,6 +116,12 @@ public:
 
     itkSetMacro(UseDynamicThreshold, bool)
     itkGetMacro(UseDynamicThreshold, bool)
+
+    itkSetMacro(FullConnectivity, bool)
+    itkGetMacro(FullConnectivity, bool)
+
+    itkSetMacro(ListSample, SamplePointerType)
+    itkGetMacro(ListSample, SamplePointerType)
 
     //OUTPUTS
 
@@ -173,6 +190,7 @@ private:
   int m_MaxSize;
   bool m_UseMinMaxSize;
   bool m_UseDynamicThreshold;
+  bool m_FullConnectivity;
 
   InputImagePixelType m_BackgroundValue;
   int m_NumberOfIntensityBins;
@@ -190,6 +208,8 @@ private:
   MeasurementType m_LongRunHighGreyLevelEmphasis;
 
   ostringstream m_HistogramOutput;
+
+  SamplePointerType m_ListSample;
 
 };
 
