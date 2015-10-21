@@ -52,22 +52,6 @@
       <default>0</default>
     </boolean>
 
-    <boolean>
-      <name>computeMinMaxIntensityPerLabel</name>
-      <longflag>computeMinMaxIntensityPerLabel</longflag>
-      <description>Compute a minimum and maximum gray level value for each labeled region instead of computing it for all regions.</description>
-      <label>Minimum maximum for each label</label>
-      <default>0</default>
-    </boolean>
-
-    <boolean>
-      <name>computeMinMaxSizePerLabel</name>
-      <longflag>computeMinMaxSizePerLabel</longflag>
-      <description>Compute a minimum and maximum component size for each labeled region instead of computing it for all regions.</description>
-      <label>Minimum maximum for each label</label>
-      <default>0</default>
-    </boolean>
-
     <double>
       <name>minIntensity</name>
       <longflag>minIntensity</longflag>
@@ -103,7 +87,7 @@
     <boolean>
       <name>useMinMaxSize</name>
       <longflag>useMinMaxSize</longflag>
-      <description>Compute the minimum and maximum size of the component. Defaults to compute the minimum and maximum size</description>
+      <description>Use the minimum and maximum set by parameter. Defaults to compute the minimum and maximum size</description>
       <label>Max intensity</label>
       <default>0</default>
     </boolean>
@@ -132,7 +116,13 @@
       <default>64</default>
     </integer>
 
-
+    <integer>
+      <name>percentile</name>
+      <longflag>percentile</longflag>
+      <description>Value were the percentage of observations falls in the sample, e.x.: percentile = 5 then histogram window will be [5%, 95%] of observations. Measurements outside of range are not clipped but instead contribute to the closest bin.</description>
+      <label>Percentile</label>
+      <default>5</default>
+    </integer>
 
   </parameters>
 

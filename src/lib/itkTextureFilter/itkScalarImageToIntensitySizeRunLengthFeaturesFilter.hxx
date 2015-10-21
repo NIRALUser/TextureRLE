@@ -37,8 +37,10 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
     m_UseDynamicThreshold = false;
     m_FullConnectivity = true;
 
+    m_Percentile = 5;
+
     m_MinSize = 1;
-    m_MaxSize = -1;
+    m_MaxSize = numeric_limits<int>::max();
     m_UseMinMaxSize = false;
 
     m_NumberOfIntensityBins = 16;
@@ -137,28 +139,22 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
 
   //Compute min max intensity of the labeled region
   if(!(this->GetUseMinMaxIntensity())){
-      cout<<"Calculating the min max intensity..."<<endl;
+      cout<<"Calculating the min max intensity to build the sample..."<<endl;
       InputImageRegionIteratorType it(inputImage, inputImage->GetLargestPossibleRegion());
       InputImagePixelType minvalue = numeric_limits< InputImagePixelType >::max();
       InputImagePixelType maxvalue = numeric_limits< InputImagePixelType >::min();
       while(!it.IsAtEnd()){
           InputImagePixelType pix = it.Get();
           if(pix != this->GetBackgroundValue()){
-              if(minvalue > pix){
-                  minvalue = pix;
-              }
-              if(maxvalue < pix){
-                  maxvalue = pix;
-              }
+              minvalue = min(minvalue, pix);
+              maxvalue = max(maxvalue, pix);
           }
           ++it;
       }
-      InputImagePixelType temp = minvalue + (maxvalue - minvalue)*.01;
-      this->SetMinIntensity(temp);
-      cout<<"\t Min intensity + 1% = "<<this->GetMinIntensity()<<endl;
-      temp = maxvalue - (maxvalue - minvalue)*.01;
-      this->SetMaxIntensity(temp);
-      cout<<"\t Max intensity - 1% = "<<this->GetMaxIntensity()<<endl;
+      this->SetMinIntensity(minvalue);
+      cout<<"\t Min intensity = "<<this->GetMinIntensity()<<endl;
+      this->SetMaxIntensity(maxvalue);
+      cout<<"\t Max intensity = "<<this->GetMaxIntensity()<<endl;
   }
 
   //Generate a sample vector.
@@ -174,6 +170,8 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
           runlengthfilter->SetMinIntensity(this->GetMinIntensity());
           runlengthfilter->SetMaxIntensity(this->GetMaxIntensity());
           runlengthfilter->SetNumberOfIntensityBins(this->GetNumberOfIntensityBins());
+          runlengthfilter->SetMinSize(this->GetMinSize());
+          runlengthfilter->SetMaxSize(this->GetMaxSize());
           runlengthfilter->SetBackgroundValue(this->GetBackgroundValue());
           runlengthfilter->SetInput(inputImage);
           runlengthfilter->Update();
@@ -184,6 +182,8 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
           runlengthfilter->SetMinIntensity(this->GetMinIntensity());
           runlengthfilter->SetMaxIntensity(this->GetMaxIntensity());
           runlengthfilter->SetNumberOfIntensityBins(this->GetNumberOfIntensityBins());
+          runlengthfilter->SetMinSize(this->GetMinSize());
+          runlengthfilter->SetMaxSize(this->GetMaxSize());
           runlengthfilter->SetBackgroundValue(this->GetBackgroundValue());
           runlengthfilter->SetFullConnectivity(this->GetFullConnectivity());
           runlengthfilter->SetInput(inputImage);
@@ -195,54 +195,74 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
       this->SetListSample(sample);
   }
 
-  if(!this->GetUseMinMaxSize()){
-      int min = numeric_limits<int>::max();
-      int max = numeric_limits<int>::min();
-      cout<<"Calculating the max size of the components..."<<endl;
-      for(int i = 0; i < sample->GetTotalFrequency(); i++){
-          int val = sample->GetMeasurementVector(i)[1];
-          if(max < val){
-              max = val;
-          }
+  typedef itk::Statistics::SampleToHistogramFilter< SampleType, HistogramType > SampleToHistogramFilterType;
+  typedef typename  SampleToHistogramFilterType::Pointer SampleToHistogramFilterPointerType;
+  typename SampleToHistogramFilterType::HistogramSizeType histogramSize(2);
+  histogramSize[0] = this->GetNumberOfIntensityBins();
+  histogramSize[1] = this->GetNumberOfSizeBins();
 
-          if(min > val){
-              min = val;
-          }
-      }
-      int temp = min + (max - min)*.01;
-      this->SetMinSize(temp);
-      cout<<"\t Min size + 1% = "<<min<<endl;
+  if(0 <= this->GetPercentile() && this->GetPercentile() <= 100){
 
-      temp = max - (max - min)*.01;
-      this->SetMaxSize(temp);
-      cout<<"\t Max size - 1% = "<<max<<endl;
+      double percentile = this->GetPercentile()/100.0;
+      cout<<"Computing percentiles: ["<<percentile<<", "<<(1.0 - percentile)<<"]"<<endl;
+
+      //Generate a histogram from the samples in order to compute the percentiles
+      SampleToHistogramFilterPointerType sampleToHistogram = SampleToHistogramFilterType::New();
+      sampleToHistogram->SetAutoMinimumMaximum(true);
+      sampleToHistogram->SetHistogramSize(histogramSize);
+      sampleToHistogram->SetInput(sample);
+      sampleToHistogram->Update();
+      const HistogramType* histogram = sampleToHistogram->GetOutput();
+
+      this->SetMinIntensity(histogram->Quantile(0, percentile));
+      this->SetMinSize(histogram->Quantile(1, percentile));
+      this->SetMaxIntensity(histogram->Quantile(0, 1.0 - percentile));
+      this->SetMaxSize(histogram->Quantile(1, 1.0 - percentile));
+
+      cout<<"\t Min intensity: "<<this->GetMinIntensity()<<endl;
+      cout<<"\t Max intensity: "<<this->GetMaxIntensity()<<endl;
+      cout<<"\t Min size: "<<this->GetMinSize()<<endl;
+      cout<<"\t Max size: "<<this->GetMaxSize()<<endl;
+
+  }else{
+      itkExceptionMacro("The percentile must be between [0, 100] -> " << this->GetPercentile())
   }
 
+  cout<<"Computing histogram..."<<endl;
   //Set the bin ranges for the histogram.
   MeasurementVectorType binmin;
   binmin.SetSize(2);
+
   binmin[0] = this->GetMinIntensity();
   binmin[1] = this->GetMinSize();
 
   MeasurementVectorType binmax;
   binmax.SetSize(2);
+
   binmax[0] = this->GetMaxIntensity();
   binmax[1] = this->GetMaxSize();
 
-  //Generate a histogram from the samples. AutoMinMax is set to false in order to generate the correct bining using the values
-  typedef itk::Statistics::SampleToHistogramFilter< SampleType, HistogramType > SampleToHistogramFilterType;
-  typedef typename  SampleToHistogramFilterType::Pointer SampleToHistogramFilterPointerType;
-  SampleToHistogramFilterPointerType sampleToHistogram = SampleToHistogramFilterType::New();
-  typename SampleToHistogramFilterType::HistogramSizeType histogramSize(2);
-  histogramSize[0] = this->GetNumberOfIntensityBins();
-  histogramSize[1] = this->GetNumberOfSizeBins();
-  sampleToHistogram->SetAutoMinimumMaximum(false);
-  sampleToHistogram->SetHistogramBinMinimum(binmin);
-  sampleToHistogram->SetHistogramBinMaximum(binmax);
-  sampleToHistogram->SetHistogramSize(histogramSize);
-  sampleToHistogram->SetInput(sample);
-  sampleToHistogram->Update();
-  const HistogramType* histogram = sampleToHistogram->GetOutput();
+  const typename SampleType::InstanceIdentifier measurementVectorSize = sample->GetMeasurementVectorSize();
+
+  HistogramPointerType histogram = HistogramType::New();
+  histogram->SetMeasurementVectorSize(measurementVectorSize);
+  histogram->SetClipBinsAtEnds(false);
+  histogram->Initialize(histogramSize, binmin, binmax);
+
+  typename SampleType::ConstIterator iter = sample->Begin();
+  typename SampleType::ConstIterator last = sample->End();
+
+  typename SampleType::MeasurementVectorType lvector;
+  typename HistogramType::MeasurementVectorType hvector(measurementVectorSize);
+
+  while ( iter != last ){
+      lvector = iter.GetMeasurementVector();
+      for (unsigned i = 0; i < measurementVectorSize; i++ ){
+          hvector[i] = lvector[i];
+      }
+      histogram->IncreaseFrequencyOfMeasurement(hvector, 1);
+      ++iter;
+  }
 
   HistogramType::SizeType size = histogram->GetSize();
   unsigned int totalBins = 1;
@@ -256,6 +276,7 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
   HistogramType::BinMaxContainerType maxs = histogram->GetMaxs();
 
   //Intensity bins
+  m_HistogramOutput << "Total frequency, "<<histogram->GetTotalFrequency()<<endl;
   m_HistogramOutput << ",";
   for(unsigned i = 0; i < mins[0].size(); i++){
       m_HistogramOutput << "[";
@@ -268,7 +289,7 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
 
   unsigned k = 0;
   for(unsigned int i = 0; i < totalBins; ++i){
-      if(i % mins[1].size() == 0){
+      if(i % mins[0].size() == 0){
           m_HistogramOutput <<endl;
           m_HistogramOutput << "[";
           m_HistogramOutput << mins[1][k];
@@ -282,9 +303,8 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
   }
 
   m_HistogramOutput << endl;
-
-
   //Calculate the RLE features of the histogram.
+  cout<<"Computing RLE analysis..."<<endl;
   HistogramToRunLengthFeaturesFilterPointerType histogramtorunlength = HistogramToRunLengthFeaturesFilterType::New();
   histogramtorunlength->SetInput(histogram);
   histogramtorunlength->Update();

@@ -94,11 +94,11 @@ public:
     itkSetMacro(NumberOfIntensityBins, int)
     itkGetMacro(NumberOfIntensityBins, int)
 
-    itkSetMacro(MinSize, int)
-    itkGetMacro(MinSize, int)
+    itkSetMacro(MinSize, double)
+    itkGetMacro(MinSize, double)
 
-    itkSetMacro(MaxSize, int)
-    itkGetMacro(MaxSize, int)
+    itkSetMacro(MaxSize, double)
+    itkGetMacro(MaxSize, double)
 
     itkSetMacro(BackgroundValue, InputImagePixelType)
     itkGetMacro(BackgroundValue, InputImagePixelType)
@@ -130,8 +130,8 @@ private:
   InputImagePixelType m_BackgroundValue;
   int m_NumberOfIntensityBins;
 
-  int m_MinSize;
-  int m_MaxSize;
+  double m_MinSize;
+  double m_MaxSize;
   int m_IntensityBinSize;
 
   bool m_FullConnectivity;

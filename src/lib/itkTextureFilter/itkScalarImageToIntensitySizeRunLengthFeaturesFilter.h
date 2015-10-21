@@ -66,6 +66,7 @@ public:
     typedef itk::ImageRegionConstIterator< InputImageType > InputImageRegionIteratorType;
 
     typedef itk::Statistics::Histogram< double > HistogramType;
+    typedef typename HistogramType::Pointer HistogramPointerType;
     typedef itk::Statistics::HistogramToRunLengthFeaturesFilter< HistogramType > HistogramToRunLengthFeaturesFilterType;
     typedef typename HistogramToRunLengthFeaturesFilterType::Pointer HistogramToRunLengthFeaturesFilterPointerType;
 
@@ -107,10 +108,10 @@ public:
 
     itkSetMacro(UseMinMaxSize, bool)
     itkGetMacro(UseMinMaxSize, bool)
-    itkSetMacro(MinSize, int)
-    itkGetMacro(MinSize, int)
-    itkSetMacro(MaxSize, int)
-    itkGetMacro(MaxSize, int)
+    itkSetMacro(MinSize, double)
+    itkGetMacro(MinSize, double)
+    itkSetMacro(MaxSize, double)
+    itkGetMacro(MaxSize, double)
     itkSetMacro(NumberOfSizeBins, int)
     itkGetMacro(NumberOfSizeBins, int)
 
@@ -155,6 +156,9 @@ public:
     itkGetMacro(LongRunHighGreyLevelEmphasis, MeasurementType)
     itkSetMacro(LongRunHighGreyLevelEmphasis, MeasurementType)
 
+    itkGetMacro(Percentile, int)
+    itkSetMacro(Percentile, int)
+
     ostream* GetHistogramOutput(){
         return &m_HistogramOutput;
     }
@@ -186,8 +190,8 @@ private:
   InputImagePixelType m_MaxIntensity;
   bool m_UseMinMaxIntensity;
 
-  int m_MinSize;
-  int m_MaxSize;
+  double m_MinSize;
+  double m_MaxSize;
   bool m_UseMinMaxSize;
   bool m_UseDynamicThreshold;
   bool m_FullConnectivity;
@@ -210,6 +214,8 @@ private:
   ostringstream m_HistogramOutput;
 
   SamplePointerType m_ListSample;
+
+  int m_Percentile;
 
 };
 

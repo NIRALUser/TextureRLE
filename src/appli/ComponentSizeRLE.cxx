@@ -28,8 +28,6 @@ using namespace std;
   }
   if(inputLabelMap.compare("") != 0){
       cout << "Input label map: "<< inputLabelMap << endl;
-      cout << "Compute minimum and maximum intensity for each label: " << computeMinMaxIntensityPerLabel <<endl;
-      cout << "Compute minimum and maximum component size for each label: " << computeMinMaxSizePerLabel <<endl;
   }
 
   cout << "The background voxel is: " << backGroundValue << endl;
@@ -178,57 +176,6 @@ using namespace std;
 
   typedef map< InputPixelType, SamplePointerType > MapListSamplePointerType;
 
-  MapListSamplePointerType mapsample;
-
-  if((!computeMinMaxIntensityPerLabel || !computeMinMaxSizePerLabel) && mapimages.size() > 1){
-
-      double tempMinIntensity = numeric_limits<double>::max();
-      double tempMaxIntensity = numeric_limits<double>::min();
-      int tempMinSize = numeric_limits<int>::max();
-      int tempMaxSize = numeric_limits<int>::min();
-
-      for(MapInputImagePointerType::iterator iter = mapimages.begin(); iter != mapimages.end(); ++iter){
-
-          cout<<endl<<"Label: "<<iter->first<<endl;
-
-          ScalarImageToRunLengthIntensitySizeFilterType::Pointer imgtorunlegth = ScalarImageToRunLengthIntensitySizeFilterType::New();
-          imgtorunlegth->SetBackgroundValue(backGroundValue);
-          imgtorunlegth->SetInput(iter->second);
-          imgtorunlegth->SetNumberOfIntensityBins(numberOfIntensityBins);
-          imgtorunlegth->SetNumberOfSizeBins(numberOfSizeBins);
-          imgtorunlegth->SetUseDynamicThreshold(useDynamicThreshold);
-          imgtorunlegth->Update();
-
-          mapsample[iter->first] = imgtorunlegth->GetListSample();
-
-          tempMinIntensity = min(imgtorunlegth->GetMinIntensity(), tempMinIntensity);
-          tempMaxIntensity = max(imgtorunlegth->GetMaxIntensity(), tempMaxIntensity);
-
-          tempMinSize = min(imgtorunlegth->GetMinSize(), tempMinSize);
-          tempMaxSize = max(imgtorunlegth->GetMaxSize(), tempMaxSize);
-      }
-
-      if(!computeMinMaxIntensityPerLabel && !useMinMaxIntensity){
-          useMinMaxIntensity = true;
-          minIntensity = tempMinIntensity;
-          maxIntensity = tempMaxIntensity;
-
-          cout<<"Using minIntensity and maxIntensity from all regions..."<<endl;
-          cout<<"\t minIntensity: "<<minIntensity<<endl;
-          cout<<"\t maxIntensity: "<<maxIntensity<<endl;
-      }
-
-      if(!computeMinMaxSizePerLabel && !useMinMaxSize){
-          useMinMaxSize = true;
-          minSize = tempMinSize;
-          maxSize = tempMaxSize;
-
-          cout<<"Using minSize and maxSize from all regions..."<<endl;
-          cout<<"\t minSize: "<<minSize<<endl;
-          cout<<"\t maxSize: "<<maxSize<<endl;
-      }
-  }
-
   for(MapInputImagePointerType::iterator iter = mapimages.begin(); iter != mapimages.end(); ++iter){
 
       cout<<endl<<"Label: "<<iter->first<<endl;
@@ -253,14 +200,11 @@ using namespace std;
           }
       }
 
-      if(useDynamicThreshold && mapsample.find(iter->first) != mapsample.end()){
-          //if the dynamic threshold is enabled, and compute the global intensity or component size is enabled then it is not necesary to recompute the sample.  if((!computeMinMaxIntensityPerLabel || !computeMinMaxSizePerLabel) && mapimages.size() > 1) then the list sample exists.
-          imgtorunlegth->SetListSample(mapsample[iter->first]);
-      }
-
       imgtorunlegth->SetUseDynamicThreshold(useDynamicThreshold);
+      imgtorunlegth->SetPercentile(percentile);
       imgtorunlegth->Update();
 
+      outhisto <<"Label: "<<iter->first<<endl;
       outhisto << ((ostringstream*)imgtorunlegth->GetHistogramOutput())->str();
 
       os<<inputVolume<<", ";
@@ -311,6 +255,8 @@ using namespace std;
   }else{
       cout<<os.str()<<endl;
   }
+
+  cout<<"Done!"<<endl;
 
   return EXIT_SUCCESS;
 
