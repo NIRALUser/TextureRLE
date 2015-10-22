@@ -103,8 +103,8 @@ public:
     itkSetMacro(BackgroundValue, InputImagePixelType)
     itkGetMacro(BackgroundValue, InputImagePixelType)
 
-    itkSetMacro(IntensityBinSize, int)
-    itkGetMacro(IntensityBinSize, int)
+    itkSetMacro(IntensityBinSize, double)
+    itkGetMacro(IntensityBinSize, double)
 
 protected:
     ScalarImageToIntensitySizeListSampleFilter();
@@ -129,7 +129,7 @@ private:
 
   double m_MinSize;
   double m_MaxSize;
-  int m_IntensityBinSize;
+  double m_IntensityBinSize;
 
 };
 

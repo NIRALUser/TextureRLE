@@ -158,8 +158,8 @@ ScalarImageToIntensitySizeListSampleFilter< TInputImage >
   SampleType *output = static_cast< SampleType * >( this->ProcessObject::GetOutput(0) );
 
   //Calculate the step size given the maximum intensity, minimum and the number of desired intensity bins.
-  this->SetIntensityBinSize(round((this->GetMaxIntensity() - this->GetMinIntensity())/this->GetNumberOfIntensityBins()));
-  int binsize = this->GetIntensityBinSize();
+  this->SetIntensityBinSize((this->GetMaxIntensity() - this->GetMinIntensity())/this->GetNumberOfIntensityBins());
+  double binsize = this->GetIntensityBinSize();
 
   if(binsize <= 0){
       cerr<<"MaxIntesity: "<<this->GetMaxIntensity()<<endl;
@@ -175,7 +175,7 @@ ScalarImageToIntensitySizeListSampleFilter< TInputImage >
   for(int i = 0; i < this->GetNumberOfIntensityBins() && maxintensity < this->GetMaxIntensity(); i++){
 
       minintensity = maxintensity;
-      maxintensity = minintensity + binsize;
+      maxintensity = minintensity + (i+1)*binsize;
 
       if(minintensity == this->GetBackgroundValue()){
           minintensity = maxintensity;
