@@ -202,29 +202,44 @@ using namespace std;
 
       imgtorunlegth->SetUseDynamicThreshold(useDynamicThreshold);
       imgtorunlegth->SetPercentile(percentile);
-      imgtorunlegth->Update();
 
-      outhisto <<"Label: "<<iter->first<<endl;
-      outhisto << ((ostringstream*)imgtorunlegth->GetHistogramOutput())->str();
+      try{
+          imgtorunlegth->Update();
 
-      os<<inputVolume<<", ";
-      os<<iter->first<<", ";
-      os<<imgtorunlegth->GetMinIntensity()<<", ";
-      os<<imgtorunlegth->GetMaxIntensity()<<", ";
-      os<<imgtorunlegth->GetNumberOfIntensityBins()<<", ";
-      os<<imgtorunlegth->GetMinSize()<<", ";
-      os<<imgtorunlegth->GetMaxSize()<<", ";
-      os<<imgtorunlegth->GetNumberOfSizeBins()<<", ";
-      os<<imgtorunlegth->GetShortRunEmphasis()<<", ";
-      os<<imgtorunlegth->GetLongRunEmphasis()<<", ";
-      os<<imgtorunlegth->GetGreyLevelNonuniformity()<<", ";
-      os<<imgtorunlegth->GetRunLengthNonuniformity()<<", ";
-      os<<imgtorunlegth->GetLowGreyLevelRunEmphasis()<<", ";
-      os<<imgtorunlegth->GetHighGreyLevelRunEmphasis()<<", ";
-      os<<imgtorunlegth->GetShortRunLowGreyLevelEmphasis()<<", ";
-      os<<imgtorunlegth->GetShortRunHighGreyLevelEmphasis()<<", ";
-      os<<imgtorunlegth->GetLongRunLowGreyLevelEmphasis()<<", ";
-      os<<imgtorunlegth->GetLongRunHighGreyLevelEmphasis()<<endl;
+          outhisto <<"Label: "<<iter->first<<endl;
+          outhisto << ((ostringstream*)imgtorunlegth->GetHistogramOutput())->str();
+
+          os<<inputVolume<<", ";
+          os<<iter->first<<", ";
+          os<<imgtorunlegth->GetMinIntensity()<<", ";
+          os<<imgtorunlegth->GetMaxIntensity()<<", ";
+          os<<imgtorunlegth->GetNumberOfIntensityBins()<<", ";
+          os<<imgtorunlegth->GetMinSize()<<", ";
+          os<<imgtorunlegth->GetMaxSize()<<", ";
+          os<<imgtorunlegth->GetNumberOfSizeBins()<<", ";
+          os<<imgtorunlegth->GetShortRunEmphasis()<<", ";
+          os<<imgtorunlegth->GetLongRunEmphasis()<<", ";
+          os<<imgtorunlegth->GetGreyLevelNonuniformity()<<", ";
+          os<<imgtorunlegth->GetRunLengthNonuniformity()<<", ";
+          os<<imgtorunlegth->GetLowGreyLevelRunEmphasis()<<", ";
+          os<<imgtorunlegth->GetHighGreyLevelRunEmphasis()<<", ";
+          os<<imgtorunlegth->GetShortRunLowGreyLevelEmphasis()<<", ";
+          os<<imgtorunlegth->GetShortRunHighGreyLevelEmphasis()<<", ";
+          os<<imgtorunlegth->GetLongRunLowGreyLevelEmphasis()<<", ";
+          os<<imgtorunlegth->GetLongRunHighGreyLevelEmphasis()<<endl;
+
+      }catch(exception& ex){
+          cerr<<"Input volume: " << inputVolume << endl;
+          if(inputMask.compare("") != 0){
+              cerr << "Input mask: " << inputMask << endl;
+          }
+          if(inputLabelMap.compare("") != 0){
+              cerr << "Input label map: "<< inputLabelMap << endl;
+              cerr<<"Label: "<<iter->first<<endl;
+          }
+          cerr<<ex.what()<<endl;
+      }
+
   }
 
   if(outputHistogram.compare("") != 0){
