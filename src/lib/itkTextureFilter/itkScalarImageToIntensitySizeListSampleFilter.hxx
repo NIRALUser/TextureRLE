@@ -166,7 +166,7 @@ ScalarImageToIntensitySizeListSampleFilter< TInputImage >
       cerr<<"MinIntesity: "<<this->GetMinIntensity()<<endl;
       cerr<<"NumberOfIntensityBins: "<<this->GetNumberOfIntensityBins()<<endl;
       cerr<<"Binsize = (maxIntensity - minIntensity)/numberOfBins"<<endl;
-      itkExceptionMacro("ERROR: Intensity bin size is 0. Please reduce the number of intensity bins.")
+      itkExceptionMacro("ERROR: Intensity bin size is 0.")
   }
 
   InputImagePixelType minintensity = this->GetMinIntensity();
@@ -175,11 +175,7 @@ ScalarImageToIntensitySizeListSampleFilter< TInputImage >
   for(int i = 0; i < this->GetNumberOfIntensityBins() && maxintensity < this->GetMaxIntensity(); i++){
 
       minintensity = maxintensity;
-      maxintensity = minintensity + (i+1)*binsize;
-
-      if(minintensity == this->GetBackgroundValue()){
-          minintensity = maxintensity;
-      }
+      maxintensity = minintensity + binsize;
 
       //Threshold the image using the threshold values
       ThresholdImageFilterPointerType thresholdfilter = ThresholdImageFilterType::New();
