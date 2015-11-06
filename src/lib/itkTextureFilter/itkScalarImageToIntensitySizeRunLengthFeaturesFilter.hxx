@@ -276,15 +276,14 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
   HistogramType::BinMaxContainerType maxs = histogram->GetMaxs();
 
   //Intensity bins
-  m_HistogramOutput << "Total frequency, "<<histogram->GetTotalFrequency()<<endl;
-  m_HistogramOutput << ",";
+  //m_HistogramOutput << "Total frequency, "<<histogram->GetTotalFrequency()<<endl;
+  m_HistogramOutput << "size";
   for(unsigned i = 0; i < mins[0].size(); i++){
-      m_HistogramOutput << "[";
+      m_HistogramOutput << ",[";
       m_HistogramOutput << mins[0][i];
       m_HistogramOutput << "-";
       m_HistogramOutput << maxs[0][i];
       m_HistogramOutput <<"]";
-      m_HistogramOutput <<",";
   }
 
   unsigned k = 0;
@@ -296,13 +295,10 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
           m_HistogramOutput << "-";
           m_HistogramOutput << maxs[1][k];
           m_HistogramOutput <<"]";
-          m_HistogramOutput <<",";
           k++;
       }
-      m_HistogramOutput << histogram->GetFrequency(i) << ", ";
+      m_HistogramOutput <<","<<histogram->GetFrequency(i);
   }
-
-  m_HistogramOutput << endl;
   //Calculate the RLE features of the histogram.
   cout<<"Computing RLE analysis..."<<endl;
   HistogramToRunLengthFeaturesFilterPointerType histogramtorunlength = HistogramToRunLengthFeaturesFilterType::New();

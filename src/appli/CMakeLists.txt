@@ -7,37 +7,41 @@ FOREACH( NAME  ${NAMES})
       COPYONLY )
 ENDFOREACH(NAME)
 
+OPTION(TEXTURE_BIOMARKER_TOOL OFF)
 
-SET(EXE_NAME ComputeTexture)
-SET(${EXE_NAME}_LIBRARIES  ${ITK_LIBRARIES})
-add_executable(${EXE_NAME}   ${EXE_NAME}.cxx)
-target_link_libraries(${EXE_NAME} ${${EXE_NAME}_LIBRARIES})
-install(TARGETS ${EXE_NAME}
-        RUNTIME
-        DESTINATION bin)
+IF(TEXTURE_BIOMARKER_TOOL)
 
-
-SET(EXE_NAME TextureBioMarkerTool)
-SET(${EXE_NAME}_LIBRARIES DMD)
-
-add_executable(${EXE_NAME}   ${EXE_NAME}.cxx)
-target_link_libraries(${EXE_NAME} ${${EXE_NAME}_LIBRARIES})
-install(TARGETS ${EXE_NAME}
-        RUNTIME
-        DESTINATION bin)
+  SET(EXE_NAME ComputeTexture)
+  SET(${EXE_NAME}_LIBRARIES  ${ITK_LIBRARIES})
+  add_executable(${EXE_NAME}   ${EXE_NAME}.cxx)
+  target_link_libraries(${EXE_NAME} ${${EXE_NAME}_LIBRARIES})
+  install(TARGETS ${EXE_NAME}
+          RUNTIME
+          DESTINATION bin)
 
 
-SET(EXE_NAME polyfit)
-SET(${EXE_NAME}_LIBRARIES  ${ITK_LIBRARIES})
+  SET(EXE_NAME TextureBioMarkerTool)
+  SET(${EXE_NAME}_LIBRARIES DMD)
 
-add_executable(${EXE_NAME}   ${EXE_NAME}.c)
-set_target_properties(${EXE_NAME} PROPERTIES LINKER_LANGUAGE C)
-target_link_libraries(${EXE_NAME} ${${EXE_NAME}_LIBRARIES})
-install(TARGETS ${EXE_NAME}
-        RUNTIME
-        DESTINATION bin)
+  add_executable(${EXE_NAME}   ${EXE_NAME}.cxx)
+  target_link_libraries(${EXE_NAME} ${${EXE_NAME}_LIBRARIES})
+  install(TARGETS ${EXE_NAME}
+          RUNTIME
+          DESTINATION bin)
 
 
+  SET(EXE_NAME polyfit)
+  SET(${EXE_NAME}_LIBRARIES  ${ITK_LIBRARIES})
+
+  add_executable(${EXE_NAME}   ${EXE_NAME}.c)
+  set_target_properties(${EXE_NAME} PROPERTIES LINKER_LANGUAGE C)
+  target_link_libraries(${EXE_NAME} ${${EXE_NAME}_LIBRARIES})
+  install(TARGETS ${EXE_NAME}
+          RUNTIME
+          DESTINATION bin)
+ENDIF(TEXTURE_BIOMARKER_TOOL)
+
+message(STATUS ${ITK_LIBRARIES})
 
 SET(EXE_NAME ComponentSizeRLE)
 SET(${EXE_NAME}_LIBRARIES  ${ITK_LIBRARIES})
@@ -59,3 +63,4 @@ target_link_libraries(${EXE_NAME} ${${EXE_NAME}_LIBRARIES})
 install(TARGETS ${${EXE_NAME}}
         RUNTIME
         DESTINATION bin)
+

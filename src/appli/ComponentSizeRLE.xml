@@ -154,5 +154,21 @@
       <default></default>
     </string>
 
+    <integer>
+      <name>outputHistogramVar</name>
+      <longflag>outputHistogramVar</longflag>
+      <description>Javascript variable name to store the output histogram string in CSV format in Module.variable[outputHistogramVar], the variable should be given as a pointer.</description>
+      <label>OutputHistogramCSV</label>
+      <default>0</default>
+    </integer>
+
+    <integer>
+      <name>outputRLEVar</name>
+      <longflag>outputRLEVar</longflag>
+      <description>Javascript variable name to store the output string int Module.variable[outputRLEVar], the variable should be given as a pointer.</description>
+      <label>OutputRLEValues</label>
+      <default>0</default>
+    </integer>
+
   </parameters>
 </executable>
