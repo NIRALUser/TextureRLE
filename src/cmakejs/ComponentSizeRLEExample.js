@@ -1,8 +1,15 @@
 var Module = require('./ComponentSizeRLE.js');
 var path = require('path');
 
-var inputImage = "/Users/prieto/NetBeansProjects/UNC/data/canine/atlas_DD_039_t1w.nrrd";
-var inputMask = "/Users/prieto/NetBeansProjects/UNC/data/canine/DD_039_seg.nii.gz";
+if(process.argv.length < 4){
+    console.error("itkImageJS example, set random pixels to the image.");
+    console.error("Use mode: .nrrd or .nii files");
+    console.error(process.argv[0], process.argv[1], " inputImage outputImage");
+    return;
+}
+
+var inputImage = process.argv[2];
+var inputMask = process.argv[3];
 var outputRLEVar = "outputRLEVar";
 var outputHistogramVar = "outputHistogramVar";
 
