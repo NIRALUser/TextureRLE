@@ -19,6 +19,8 @@ int executeRLE(int argc, char* argv[]);
 #include <emscripten.h>
 #include <bind.h>
 
+#include "itkImageJS.h"
+
 using namespace std;
 using namespace emscripten;
 
@@ -59,6 +61,28 @@ extern "C" {
       );
       
     }
+}
+
+// Binding code
+EMSCRIPTEN_BINDINGS(itk_image_j_s) {
+  class_<itkImageJS>("itkImageJS")
+    .constructor<>()
+    .function("ReadImage", &itkImageJS::ReadImage)
+    .function("WriteImage", &itkImageJS::WriteImage)
+    .function("MountDirectory", &itkImageJS::MountDirectory)
+    .function("GetBufferPointer", &itkImageJS::GetBufferPointer)
+    .function("GetBufferSize", &itkImageJS::GetBufferSize)
+    .function("GetSpacing", &itkImageJS::GetSpacing)
+    .function("GetOrigin", &itkImageJS::GetOrigin)
+    .function("GetDimensions", &itkImageJS::GetDimensions)
+    .function("GetDirection", &itkImageJS::GetDirection)
+    .function("GetPixel", &itkImageJS::GetPixel)
+    .function("GetPixelWorld", &itkImageJS::GetPixelWorld)
+    .function("SetPixel", &itkImageJS::SetPixel)
+    .function("GetDataType", &itkImageJS::GetDataType)
+    .function("GetFilename", &itkImageJS::GetFilename)
+    .function("SetFilename", &itkImageJS::SetFilename)
+    ;
 }
 
 #endif
@@ -258,7 +282,7 @@ int executeRLE(int argc, char* argv[]){
 
     vector<string> OutputNamesVector(OutputNames, OutputNames + (sizeof(OutputNames)/sizeof(*OutputNames)));
     for(unsigned i = 0; i < OutputNamesVector.size(); i++){
-        os<<OutputNames[i]<<", ";
+        os<<OutputNames[i]<<",";
     }
 
     typedef itk::Statistics::ScalarImageToIntensitySizeRunLengthFeaturesFilter< InputImageType > ScalarImageToRunLengthIntensitySizeFilterType;
@@ -303,23 +327,23 @@ int executeRLE(int argc, char* argv[]){
             outhisto <<((ostringstream*)imgtorunlegth->GetHistogramOutput())->str();
 
             os<<endl;
-            os<<inputVolume<<", ";
-            os<<iter->first<<", ";
-            os<<imgtorunlegth->GetMinIntensity()<<", ";
-            os<<imgtorunlegth->GetMaxIntensity()<<", ";
-            os<<imgtorunlegth->GetNumberOfIntensityBins()<<", ";
-            os<<imgtorunlegth->GetMinSize()<<", ";
-            os<<imgtorunlegth->GetMaxSize()<<", ";
-            os<<imgtorunlegth->GetNumberOfSizeBins()<<", ";
-            os<<imgtorunlegth->GetShortRunEmphasis()<<", ";
-            os<<imgtorunlegth->GetLongRunEmphasis()<<", ";
-            os<<imgtorunlegth->GetGreyLevelNonuniformity()<<", ";
-            os<<imgtorunlegth->GetRunLengthNonuniformity()<<", ";
-            os<<imgtorunlegth->GetLowGreyLevelRunEmphasis()<<", ";
-            os<<imgtorunlegth->GetHighGreyLevelRunEmphasis()<<", ";
-            os<<imgtorunlegth->GetShortRunLowGreyLevelEmphasis()<<", ";
-            os<<imgtorunlegth->GetShortRunHighGreyLevelEmphasis()<<", ";
-            os<<imgtorunlegth->GetLongRunLowGreyLevelEmphasis()<<", ";
+            os<<inputVolume<<",";
+            os<<iter->first<<",";
+            os<<imgtorunlegth->GetMinIntensity()<<",";
+            os<<imgtorunlegth->GetMaxIntensity()<<",";
+            os<<imgtorunlegth->GetNumberOfIntensityBins()<<",";
+            os<<imgtorunlegth->GetMinSize()<<",";
+            os<<imgtorunlegth->GetMaxSize()<<",";
+            os<<imgtorunlegth->GetNumberOfSizeBins()<<",";
+            os<<imgtorunlegth->GetShortRunEmphasis()<<",";
+            os<<imgtorunlegth->GetLongRunEmphasis()<<",";
+            os<<imgtorunlegth->GetGreyLevelNonuniformity()<<",";
+            os<<imgtorunlegth->GetRunLengthNonuniformity()<<",";
+            os<<imgtorunlegth->GetLowGreyLevelRunEmphasis()<<",";
+            os<<imgtorunlegth->GetHighGreyLevelRunEmphasis()<<",";
+            os<<imgtorunlegth->GetShortRunLowGreyLevelEmphasis()<<",";
+            os<<imgtorunlegth->GetShortRunHighGreyLevelEmphasis()<<",";
+            os<<imgtorunlegth->GetLongRunLowGreyLevelEmphasis()<<",";
             os<<imgtorunlegth->GetLongRunHighGreyLevelEmphasis();
 
         }catch(exception& ex){

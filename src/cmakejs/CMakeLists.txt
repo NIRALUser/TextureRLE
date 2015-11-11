@@ -1,7 +1,7 @@
 
 cmake_minimum_required(VERSION 3.3)
 
-SET(FLAGS "--bind -s EXPORTED_FUNCTIONS=\"['_executeRLE', '_writeString', '_MountDirectory']\" -Wno-warn-absolute-paths --memory-init-file 0 -s DISABLE_EXCEPTION_CATCHING=0 -s ALLOW_MEMORY_GROWTH=1")
+SET(FLAGS "--bind -s EXPORTED_FUNCTIONS=\"['_executeRLE', '_MountDirectory']\" -Wno-warn-absolute-paths --memory-init-file 0 -s DISABLE_EXCEPTION_CATCHING=0 -s ALLOW_MEMORY_GROWTH=1")
 
 SET (CMAKE_CXX_FLAGS ${FLAGS} CACHE STRING "compile flags" FORCE)
 SET (CMAKE_C_FLAGS ${FLAGS} CACHE STRING "compile flags" FORCE)
@@ -37,7 +37,7 @@ FIND_FILE(GENERATECLP_EXE NAMES GenerateCLP HINTS "${SLICER_EXECUTION_MODEL_DIR}
 
 SET(EXE_NAME ComponentSizeRLE)
 SET(${EXE_NAME}_LIBRARIES  ${ITK_LIBRARIES})
-SET(${EXE_NAME}_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/../appli/${EXE_NAME}.cxx)
+SET(${EXE_NAME}_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/../appli/${EXE_NAME}.cxx ${CMAKE_CURRENT_SOURCE_DIR}/itkImageJS.cxx)
 
 
 set(${EXE_NAME}_XML_INPUT ${CMAKE_CURRENT_SOURCE_DIR}/../appli/${EXE_NAME}.xml)
@@ -52,6 +52,7 @@ add_custom_command(
       )
 add_custom_target(GENERATECLP DEPENDS ${${EXE_NAME}_GENERATE_OUTPUT})
 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 SET(EXE_NAME ComponentSizeRLE)
