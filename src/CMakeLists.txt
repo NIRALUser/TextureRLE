@@ -8,7 +8,7 @@ IF(${ITK_FOUND})
 	include(${ITK_USE_FILE})
 ENDIF(${ITK_FOUND})
 
-FIND_PACKAGE(VTK REQUIRED)
+FIND_PACKAGE(VTK)
 IF(${VTK_FOUND})
 	include(${VTK_USE_FILE})
 ENDIF(${VTK_FOUND})
@@ -33,9 +33,3 @@ LINK_DIRECTORIES(
 add_subdirectory(lib)
 add_subdirectory(appli)
 add_subdirectory(install)
-
-OPTION(BUILD_TEST "Build test ?" OFF)
-IF(BUILD_TEST)
-	add_subdirectory(test)
-ENDIF(BUILD_TEST)
-

@@ -28,13 +28,21 @@
       <longflag>m</longflag>
     </image>
 
+    <image>
+      <name>inputLabelMap</name>
+      <label>Input Label map</label>
+      <channel>input</channel>
+      <description>Label map with 0 for background and non 0 labels elsewhere. The RLE analysis is done separately for each label.</description>
+      <longflag>l</longflag>
+    </image>
+
     <double>
-      <name>foreGroundValue</name>
-      <longflag>foreGroundValue</longflag>
-      <description>Set the foreground value of the mask, or the value of the pixel considered to be 'inside'</description>
-      <label>Fore ground value</label>
-      <default>1</default>
-    </double>
+      <name>backGroundValue</name>
+      <longflag>backGroundValue</longflag>
+      <description>Set the background value of the image</description>
+      <label>Back ground value</label>
+      <default>0</default>
+    </double>    
 
     <boolean>
       <name>useMinMaxIntensity</name>
@@ -65,7 +73,7 @@
       <longflag>numberOfIntensityBins</longflag>
       <description>Number of intensity bins to build the histogram</description>
       <label>Intensity Bins</label>
-      <default>16</default>
+      <default>64</default>
     </integer>
 
     <boolean>

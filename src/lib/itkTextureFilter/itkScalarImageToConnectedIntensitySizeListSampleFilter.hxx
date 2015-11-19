@@ -42,6 +42,8 @@ ScalarImageToConnectedIntensitySizeListSampleFilter< TInputImage >
     m_MaxSize = numeric_limits<int>::max();
     m_BackgroundValue = 0;
 
+    m_FullConnectivity = true;
+
     this->SetNumberOfRequiredInputs(1);
     this->SetNumberOfRequiredOutputs(1);
     this->ProcessObject::SetNthOutput( 0, this->MakeOutput(0) );
@@ -128,13 +130,12 @@ ScalarImageToConnectedIntensitySizeListSampleFilter< TInputImage >::GenerateOutp
 }
 
 template< typename TImage >
-const typename ScalarImageToConnectedIntensitySizeListSampleFilter< TImage >::SampleType *
+const typename ScalarImageToConnectedIntensitySizeListSampleFilter< TImage >::SampleType*
 ScalarImageToConnectedIntensitySizeListSampleFilter< TImage >
 ::GetOutput() const
 {
   const SampleType *output =
     static_cast< const SampleType * >( this->ProcessObject::GetOutput(0) );
-
   return output;
 }
 
@@ -198,6 +199,9 @@ ScalarImageToConnectedIntensitySizeListSampleFilter< TInputImage >
           connectedthreshold->SetUpper(maxintensity);
           connectedthreshold->SetReplaceValue(255);
           connectedthreshold->SetSeed(it.GetIndex());
+          if(this->GetFullConnectivity()){
+              connectedthreshold->SetConnectivity(ThresholdImageFilterType::FullConnectivity);
+          }
           connectedthreshold->Update();
 
           OutputImagePointerType imgthresh = connectedthreshold->GetOutput();

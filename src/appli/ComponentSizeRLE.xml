@@ -24,8 +24,16 @@
       <name>inputMask</name>
       <label>Input Mask</label>
       <channel>input</channel>
-      <description>Input mask</description>
+      <description>Input mask with 0 for background and otherwise for objects.</description>
       <longflag>m</longflag>
+    </image>
+
+    <image>
+      <name>inputLabelMap</name>
+      <label>Input Label map</label>
+      <channel>input</channel>
+      <description>Label map with 0 for background and non 0 labels elsewhere. The RLE analysis is done separately for each label.</description>
+      <longflag>l</longflag>
     </image>
 
     <double>
@@ -65,7 +73,7 @@
       <longflag>numberOfIntensityBins</longflag>
       <description>Number of intensity bins to build the histogram</description>
       <label>Intensity Bins</label>
-      <default>16</default>
+      <default>64</default>
     </integer>
 
     <boolean>
@@ -79,7 +87,7 @@
     <boolean>
       <name>useMinMaxSize</name>
       <longflag>useMinMaxSize</longflag>
-      <description>Compute the minimum and maximum size of the component. Defaults to compute the minimum and maximum size</description>
+      <description>Use the minimum and maximum set by parameter. Defaults to compute the minimum and maximum size</description>
       <label>Max intensity</label>
       <default>0</default>
     </boolean>
@@ -105,10 +113,16 @@
       <longflag>numberOfSizeBins</longflag>
       <description>Number of size bins to build the histogram</description>
       <label>Max intensity</label>
-      <default>16</default>
+      <default>64</default>
     </integer>
 
-
+    <integer>
+      <name>percentile</name>
+      <longflag>percentile</longflag>
+      <description>Value were the percentage of observations falls in the sample, e.x.: percentile = 5 then histogram window will be [5%, 95%] of observations. Measurements outside of range are not clipped but instead contribute to the closest bin.</description>
+      <label>Percentile</label>
+      <default>5</default>
+    </integer>
 
   </parameters>
 
@@ -117,12 +131,20 @@
     <description>Output parameters</description>
 
     <string>
-      <name>outputHistogramCSV</name>
-      <longflag>outputHistogramCSV</longflag>
+      <name>outputHistogram</name>
+      <longflag>outputHistogram</longflag>
       <description>Filename to store the histogram in CSV format</description>
       <label>OutputHistogramCSV</label>
       <default></default>
     </string>
+
+    <boolean>
+      <name>outputHistogramPrint</name>
+      <longflag>outputHistogramPrint</longflag>
+      <description>Print the histogram to console</description>
+      <label>OutputHistogramPrint</label>
+      <default>0</default>
+    </boolean>
 
     <string>
       <name>outputRLE</name>
@@ -131,6 +153,22 @@
       <label>OutputRLEValues</label>
       <default></default>
     </string>
+
+    <integer>
+      <name>outputHistogramVar</name>
+      <longflag>outputHistogramVar</longflag>
+      <description>Javascript variable name to store the output histogram string in CSV format in Module.variable[outputHistogramVar], the variable should be given as a pointer.</description>
+      <label>OutputHistogramCSV</label>
+      <default>0</default>
+    </integer>
+
+    <integer>
+      <name>outputRLEVar</name>
+      <longflag>outputRLEVar</longflag>
+      <description>Javascript variable name to store the output string int Module.variable[outputRLEVar], the variable should be given as a pointer.</description>
+      <label>OutputRLEValues</label>
+      <default>0</default>
+    </integer>
 
   </parameters>
 </executable>

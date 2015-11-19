@@ -29,7 +29,7 @@ can be obtained from http://nihroadmap.nih.gov/bioinformatics.
 #include "itkNumericTraits.h"
 #include "itkArray.h"
 #include "itkSimpleDataObjectDecorator.h"
-#include "itk_hash_map.h"
+#include "itksys/hash_map.hxx"
 #include "itkFastMutexLock.h"
 #include <vector>
 #include <vnl/algo/vnl_symmetric_eigensystem.h>
@@ -153,8 +153,8 @@ public:
         //m_BoundingBox.resize(imageDimension*2);
         for (unsigned int i = 0; i < imageDimension * 2; i += 2)
           {
-          m_BoundingBox[i] = NumericTraits<ITK_TYPENAME IndexType::IndexValueType>::max();
-          m_BoundingBox[i+1] = NumericTraits<ITK_TYPENAME IndexType::IndexValueType>::NonpositiveMin();
+          m_BoundingBox[i] = NumericTraits<typename IndexType::IndexValueType>::max();
+          m_BoundingBox[i+1] = NumericTraits<typename IndexType::IndexValueType>::NonpositiveMin();
           }
         
         m_BoundingBoxVolume = 0;
@@ -229,9 +229,9 @@ public:
   
   /** Type of the map used to store data per label */
   // Map from the label to the class storing all of the geometry information.
-  typedef itk::hash_map<LabelPixelType, LabelGeometry> MapType;
-  typedef typename itk::hash_map<LabelPixelType, LabelGeometry>::iterator MapIterator;
-  typedef typename itk::hash_map<LabelPixelType, LabelGeometry>::const_iterator MapConstIterator;
+  typedef itksys::hash_map<LabelPixelType, LabelGeometry> MapType;
+  typedef typename itksys::hash_map<LabelPixelType, LabelGeometry>::iterator MapIterator;
+  typedef typename itksys::hash_map<LabelPixelType, LabelGeometry>::const_iterator MapConstIterator;
   
   // Macros for enabling the calculation of additional features.
   itkGetMacro(CalculatePixelIndices, bool);

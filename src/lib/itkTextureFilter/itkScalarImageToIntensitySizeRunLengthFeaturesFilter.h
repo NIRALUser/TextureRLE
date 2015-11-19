@@ -24,7 +24,10 @@
 #include <itkHistogramToRunLengthFeaturesFilter.h>
 #include <itkMapContainer.h>
 
-#include <itkImageToListSampleFilter.h>
+#include "itkScalarImageToIntensitySizeListSampleFilter.h"
+#include "itkScalarImageToConnectedIntensitySizeListSampleFilter.h"
+#include <itkSampleToHistogramFilter.h>
+
 using namespace std;
 
 namespace itk
@@ -62,13 +65,22 @@ public:
 
     typedef itk::ImageRegionConstIterator< InputImageType > InputImageRegionIteratorType;
 
-    typedef itk::Statistics::Histogram< int > HistogramType;
+    typedef itk::Statistics::Histogram< double > HistogramType;
+    typedef typename HistogramType::Pointer HistogramPointerType;
     typedef itk::Statistics::HistogramToRunLengthFeaturesFilter< HistogramType > HistogramToRunLengthFeaturesFilterType;
     typedef typename HistogramToRunLengthFeaturesFilterType::Pointer HistogramToRunLengthFeaturesFilterPointerType;
 
     typedef typename HistogramToRunLengthFeaturesFilterType::MeasurementType MeasurementType;
     typedef typename HistogramToRunLengthFeaturesFilterType::MeasurementVectorType MeasurementVectorType;
 
+
+    typedef itk::Statistics::ScalarImageToIntensitySizeListSampleFilter< InputImageType > ScalarImageToIntensitySizeListSampleType;
+    typedef typename ScalarImageToIntensitySizeListSampleType::Pointer ScalarImageToIntensitySizeListSamplePointerType;
+    typedef typename  ScalarImageToIntensitySizeListSampleType::SampleType SampleType;
+    typedef typename SampleType::Pointer SamplePointerType;
+
+    typedef itk::Statistics::ScalarImageToConnectedIntensitySizeListSampleFilter< InputImageType > ScalarImageToConnectedIntensitySizeListSampleType;
+    typedef typename ScalarImageToConnectedIntensitySizeListSampleType::Pointer ScalarImageToConnectedIntensitySizeListSamplePointerType;
 
 
     void PrintSelf(std::ostream & os, Indent indent) const ITK_OVERRIDE;
@@ -82,8 +94,6 @@ public:
     const InputImageType * GetInput() const;
     const InputImageType * GetInput(unsigned int idx) const;
 
-    itkSetMacro(InputMask, InputImagePointer)
-    itkGetMacro(InputMask, InputImageConstPointer)
     itkSetMacro(BackgroundValue, InputImagePixelType)
     itkGetMacro(BackgroundValue, InputImagePixelType)
 
@@ -98,15 +108,21 @@ public:
 
     itkSetMacro(UseMinMaxSize, bool)
     itkGetMacro(UseMinMaxSize, bool)
-    itkSetMacro(MinSize, int)
-    itkGetMacro(MinSize, int)
-    itkSetMacro(MaxSize, int)
-    itkGetMacro(MaxSize, int)
+    itkSetMacro(MinSize, double)
+    itkGetMacro(MinSize, double)
+    itkSetMacro(MaxSize, double)
+    itkGetMacro(MaxSize, double)
     itkSetMacro(NumberOfSizeBins, int)
     itkGetMacro(NumberOfSizeBins, int)
 
     itkSetMacro(UseDynamicThreshold, bool)
     itkGetMacro(UseDynamicThreshold, bool)
+
+    itkSetMacro(FullConnectivity, bool)
+    itkGetMacro(FullConnectivity, bool)
+
+    itkSetMacro(ListSample, SamplePointerType)
+    itkGetMacro(ListSample, SamplePointerType)
 
     //OUTPUTS
 
@@ -140,6 +156,9 @@ public:
     itkGetMacro(LongRunHighGreyLevelEmphasis, MeasurementType)
     itkSetMacro(LongRunHighGreyLevelEmphasis, MeasurementType)
 
+    itkGetMacro(Percentile, int)
+    itkSetMacro(Percentile, int)
+
     ostream* GetHistogramOutput(){
         return &m_HistogramOutput;
     }
@@ -167,16 +186,15 @@ private:
   ScalarImageToIntensitySizeRunLengthFeaturesFilter(const Self &); //purposely not implemented
   void operator=(const Self &);                //purposely not implemented
 
-  InputImageConstPointer m_InputMask;
-
   InputImagePixelType m_MinIntensity;
   InputImagePixelType m_MaxIntensity;
   bool m_UseMinMaxIntensity;
 
-  int m_MinSize;
-  int m_MaxSize;
+  double m_MinSize;
+  double m_MaxSize;
   bool m_UseMinMaxSize;
   bool m_UseDynamicThreshold;
+  bool m_FullConnectivity;
 
   InputImagePixelType m_BackgroundValue;
   int m_NumberOfIntensityBins;
@@ -194,6 +212,10 @@ private:
   MeasurementType m_LongRunHighGreyLevelEmphasis;
 
   ostringstream m_HistogramOutput;
+
+  SamplePointerType m_ListSample;
+
+  int m_Percentile;
 
 };
 

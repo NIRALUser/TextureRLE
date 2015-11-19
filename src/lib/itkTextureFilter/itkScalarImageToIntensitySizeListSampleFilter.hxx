@@ -158,15 +158,15 @@ ScalarImageToIntensitySizeListSampleFilter< TInputImage >
   SampleType *output = static_cast< SampleType * >( this->ProcessObject::GetOutput(0) );
 
   //Calculate the step size given the maximum intensity, minimum and the number of desired intensity bins.
-  this->SetIntensityBinSize(round((this->GetMaxIntensity() - this->GetMinIntensity())/this->GetNumberOfIntensityBins()));
-  int binsize = this->GetIntensityBinSize();
+  this->SetIntensityBinSize((this->GetMaxIntensity() - this->GetMinIntensity())/this->GetNumberOfIntensityBins());
+  double binsize = this->GetIntensityBinSize();
 
   if(binsize <= 0){
       cerr<<"MaxIntesity: "<<this->GetMaxIntensity()<<endl;
       cerr<<"MinIntesity: "<<this->GetMinIntensity()<<endl;
       cerr<<"NumberOfIntensityBins: "<<this->GetNumberOfIntensityBins()<<endl;
       cerr<<"Binsize = (maxIntensity - minIntensity)/numberOfBins"<<endl;
-      itkExceptionMacro("ERROR: Intensity bin size is 0. Please reduce the number of intensity bins.")
+      itkExceptionMacro("ERROR: Intensity bin size is 0.")
   }
 
   InputImagePixelType minintensity = this->GetMinIntensity();
@@ -176,10 +176,6 @@ ScalarImageToIntensitySizeListSampleFilter< TInputImage >
 
       minintensity = maxintensity;
       maxintensity = minintensity + binsize;
-
-      if(minintensity == this->GetBackgroundValue()){
-          minintensity = maxintensity;
-      }
 
       //Threshold the image using the threshold values
       ThresholdImageFilterPointerType thresholdfilter = ThresholdImageFilterType::New();
