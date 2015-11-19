@@ -151,7 +151,7 @@ using namespace std;
 
   vector<string> OutputNamesVector(OutputNames, OutputNames + (sizeof(OutputNames)/sizeof(*OutputNames)));
   for(unsigned i = 0; i < OutputNamesVector.size(); i++){
-      os<<OutputNames[i]<<", ";
+      os<<OutputNames[i]<<",";
   }
   os<<endl;
 
