@@ -17,6 +17,7 @@ find_package(ITK COMPONENTS
   ITKImageGrid
   ITKLabelMap
   ITKRegionGrowing
+  ITKConnectedComponents
   ${ITK_IO_MODULES_USED}
 )
 IF(${ITK_FOUND})
