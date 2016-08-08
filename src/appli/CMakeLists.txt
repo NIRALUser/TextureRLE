@@ -64,3 +64,12 @@ install(TARGETS ${${EXE_NAME}}
         RUNTIME
         DESTINATION bin)
 
+
+SET(EXE_NAME DMDBioMarkerTool)
+SET(${EXE_NAME}_LIBRARIES  ${ITK_LIBRARIES} DMD)
+SET(${EXE_NAME}_SOURCE ${EXE_NAME}.cxx)
+add_executable(${EXE_NAME}   ${${EXE_NAME}_SOURCE})
+target_link_libraries(${EXE_NAME} ${${EXE_NAME}_LIBRARIES})
+install(TARGETS ${${EXE_NAME}}
+        RUNTIME
+        DESTINATION bin)
