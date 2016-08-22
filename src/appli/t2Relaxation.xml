@@ -4,7 +4,7 @@
   <title>Co-occurrence matrix texture</title>
   <version>1.0.0</version>
   <description>
-    CoMatrixTextureTool calculates run length encoding 
+    Computes the relaxation constant T2 at each pixel.
   </description>
   <contributor>Juan Carlos Prieto</contributor>
 
@@ -16,14 +16,14 @@
       <name>inputVolume</name>
       <label>Input volume</label>
       <channel>input</channel>
-      <description>Input volume to be filtered</description>
+      <description>Input volume. It should be a vector image with the magnetization values 'M' at each pixel</description>
       <longflag>i</longflag>
     </image>    
 
     <double>
       <name>echoTime</name>
       <longflag>et</longflag>
-      <description>First echo time of acquisition</description>
+      <description>First echo time of acquisition. The echoes are calculated as (i+1)*echoTime</description>
       <label>Echo time</label>
       <default>8.9</default>
     </double>
@@ -39,8 +39,8 @@
     <boolean>
       <name>notRescaleIntensity</name>
       <longflag>notRescale</longflag>
-      <description>Rescale the intensity of the image to unsigned short -> [0,65536]</description>
-      <label>Rescale intensity</label>      
+      <description>Do not rescale the intensity of the image to unsigned short -> [0,65536]. The image is rescaled and the values equal to 65536 are threshold. They correspond to nan values that appear when a magnetization value is equal to 0</description>
+      <label>Rescale intensity</label>
     </boolean>
 
     <boolean>
