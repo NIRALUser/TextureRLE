@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<executable>
+  <category>T2 relaxation time calculation</category>
+  <title>Co-occurrence matrix texture</title>
+  <version>1.0.0</version>
+  <description>
+    CoMatrixTextureTool calculates run length encoding 
+  </description>
+  <contributor>Juan Carlos Prieto</contributor>
+
+  <parameters>
+    <label>Input parameters</label>
+    <description>Input parameters</description>
+
+    <image>
+      <name>inputVolume</name>
+      <label>Input volume</label>
+      <channel>input</channel>
+      <description>Input volume to be filtered</description>
+      <longflag>i</longflag>
+    </image>    
+
+    <double>
+      <name>echoTime</name>
+      <longflag>et</longflag>
+      <description>First echo time of acquisition</description>
+      <label>Echo time</label>
+      <default>8.9</default>
+    </double>
+
+    <double>
+      <name>m0</name>
+      <longflag>m0</longflag>
+      <description>Set the M0 value for the fitting</description>
+      <label>M0</label>
+      <default>1</default>
+    </double>
+
+    <boolean>
+      <name>notRescaleIntensity</name>
+      <longflag>notRescale</longflag>
+      <description>Rescale the intensity of the image to unsigned short -> [0,65536]</description>
+      <label>Rescale intensity</label>      
+    </boolean>
+
+    <boolean>
+      <name>otsuThreshold</name>
+      <longflag>otsu</longflag>
+      <description>Compute foreground and background of the rescaled image. Write the foreground image</description>
+      <label>Ostu threshold</label>      
+    </boolean>
+
+    <integer>
+      <name>otsuMaskingValue</name>
+      <longflag>otsuValue</longflag>
+      <description>Set the masking value for the otsu threshold filter. It is often 1 since it will correspond to the dominant class in the image which should be the background.</description>
+      <label>Otsu masking value</label>
+      <default>1</default>
+    </integer>
+
+  </parameters>
+
+  <parameters>
+    <label>Ouput parameters</label>
+    <description>Output parameters</description>
+
+    <image>
+      <name>outputRelaxationMap</name>
+      <longflag>o</longflag>
+      <description>Output relaxation map of T2 spin spin image</description>
+      <label>Output T2 Map</label>
+      <default>outT2.nrrd</default>
+    </image>
+
+  </parameters>
+</executable>
