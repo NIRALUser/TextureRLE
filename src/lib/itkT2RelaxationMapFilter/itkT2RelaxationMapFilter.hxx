@@ -84,6 +84,8 @@ namespace itk
 
       if(b[0] != 0 && !isnan(b[0])){
         outit.Set(-1.0/b[0]);
+      }else{
+        outit.Set(0);
       }
 
       ++init;
