@@ -72,7 +72,7 @@ namespace itk
 
       InputImagePixelType t2values = init.Get();
       for(int i = 0; i < numComponents; i++){
-        Y[i] = t2values[i];
+        Y[i] = t2values[i] + 1;
       }
       
       t2fit.SetY(Y);
