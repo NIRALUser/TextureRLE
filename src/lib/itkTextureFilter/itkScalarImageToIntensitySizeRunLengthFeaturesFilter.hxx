@@ -35,7 +35,7 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
     m_MaxIntensity = 0;
     m_UseMinMaxIntensity = false;
     m_UseDynamicThreshold = false;
-    m_FullConnectivity = true;
+    m_FullConnectivity = false;
 
     m_Percentile = 5;
 
