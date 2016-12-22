@@ -199,6 +199,7 @@ ScalarImageToConnectedIntensitySizeListSampleFilter< TInputImage >
           connectedthreshold->SetUpper(maxintensity);
           connectedthreshold->SetReplaceValue(255);
           connectedthreshold->SetSeed(it.GetIndex());
+          connectedthreshold->SetConnectivity(ThresholdImageFilterType::FaceConnectivity);
           if(this->GetFullConnectivity()){
               connectedthreshold->SetConnectivity(ThresholdImageFilterType::FullConnectivity);
           }
