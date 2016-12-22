@@ -42,7 +42,7 @@ ScalarImageToConnectedIntensitySizeListSampleFilter< TInputImage >
     m_MaxSize = numeric_limits<int>::max();
     m_BackgroundValue = 0;
 
-    m_FullConnectivity = true;
+    m_FullConnectivity = false;
 
     this->SetNumberOfRequiredInputs(1);
     this->SetNumberOfRequiredOutputs(1);

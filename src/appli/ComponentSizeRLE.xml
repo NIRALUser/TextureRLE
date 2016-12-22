@@ -52,6 +52,14 @@
       <default>0</default>
     </boolean>
 
+    <boolean>
+      <name>useFullConnectivity</name>
+      <longflag>useFullConnectivity</longflag>
+      <description>Use full connectivity to compute the run lenghts</description>
+      <label>Use full connectivity to compute the run lenghts</label>
+      <default>0</default>
+    </boolean>
+
     <double>
       <name>minIntensity</name>
       <longflag>minIntensity</longflag>

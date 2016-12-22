@@ -79,9 +79,13 @@ EMSCRIPTEN_BINDINGS(itk_image_j_s) {
     .function("GetPixel", &itkImageJS::GetPixel)
     .function("GetPixelWorld", &itkImageJS::GetPixelWorld)
     .function("SetPixel", &itkImageJS::SetPixel)
+    .function("SetPixelWorld", &itkImageJS::SetPixelWorld)
     .function("GetDataType", &itkImageJS::GetDataType)
     .function("GetFilename", &itkImageJS::GetFilename)
     .function("SetFilename", &itkImageJS::SetFilename)
+    .function("GetSlice", &itkImageJS::GetSlice)
+    .function("TransformPhysicalPointToIndex", &itkImageJS::TransformPhysicalPointToIndex)
+    .function("TransformIndexToPhysicalPoint", &itkImageJS::TransformIndexToPhysicalPoint)
     ;
 }
 
@@ -313,6 +317,11 @@ int executeRLE(int argc, char* argv[]){
                 imgtorunlegth->SetMaxSize(maxSize);
             }
         }
+
+        if(useFullConnectivity){
+            imgtorunlegth->SetFullConnectivity(useFullConnectivity);
+        }
+
 
         imgtorunlegth->SetUseDynamicThreshold(useDynamicThreshold);
         imgtorunlegth->SetPercentile(percentile);
