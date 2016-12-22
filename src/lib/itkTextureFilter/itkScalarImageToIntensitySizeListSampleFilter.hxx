@@ -45,6 +45,8 @@ ScalarImageToIntensitySizeListSampleFilter< TInputImage >
     this->SetNumberOfRequiredInputs(1);
     this->SetNumberOfRequiredOutputs(1);
     this->ProcessObject::SetNthOutput( 0, this->MakeOutput(0) );
+
+    m_FullConnectivity = false;
 }
 
 /**
@@ -190,7 +192,12 @@ ScalarImageToIntensitySizeListSampleFilter< TInputImage >
 
       //Calculate the connected components and label each one of them with a unique value
       ConnectedComponentImageFilterPointerType connectedcomponents = ConnectedComponentImageFilterType::New();
+
       connectedcomponents->SetInput(imgthresh);
+      connectedcomponents->FullyConnectedOff();
+      if(this->GetFullConnectivity()){
+        connectedcomponents->FullyConnectedOn();
+      }
 
       OutputImagePointerType imglabel = connectedcomponents->GetOutput();
 

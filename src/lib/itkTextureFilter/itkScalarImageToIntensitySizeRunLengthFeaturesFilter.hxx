@@ -174,6 +174,7 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
           runlengthfilter->SetMaxSize(this->GetMaxSize());
           runlengthfilter->SetBackgroundValue(this->GetBackgroundValue());
           runlengthfilter->SetInput(inputImage);
+          runlengthfilter->SetFullConnectivity(this->GetFullConnectivity());
           runlengthfilter->Update();
 
           sample = const_cast< SampleType* >(runlengthfilter->GetOutput());
