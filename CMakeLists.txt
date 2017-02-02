@@ -9,7 +9,7 @@ set(LOCAL_PROJECT_NAME TextureRLE)
 # Project version number.
 set(${LOCAL_PROJECT_NAME}_VERSION_MAJOR "0")
 set(${LOCAL_PROJECT_NAME}_VERSION_MINOR "1")
-set(${LOCAL_PROJECT_NAME}_VERSION_PATCH "0")
+set(${LOCAL_PROJECT_NAME}_VERSION_PATCH "1")
 
 #-----------------------------------------------------------------------------
 # Update CMake module path

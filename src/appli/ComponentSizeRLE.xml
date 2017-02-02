@@ -2,7 +2,7 @@
 <executable>
   <category>TextureAnalysis</category>
   <title>Co-occurrence matrix texture</title>
-  <version>1.0.0</version>
+  <version>1.0.2</version>
   <description>
     CoMatrixTextureTool calculates run length encoding 
   </description>

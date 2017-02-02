@@ -164,10 +164,12 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
   SamplePointerType sample;
 
   if(this->GetListSample()){
+	cout<<"\t Using generated sample...  "<<endl;
       sample = this->GetListSample();
   }else{
       if(!this->GetUseDynamicThreshold()){
         //This filter creates intensity bins between min and max of the region. Iterates through 
+	 cout<<"\t Using ScalarImageToIntensitySizeListSampleType ...  "<<endl;
           ScalarImageToIntensitySizeListSamplePointerType runlengthfilter = ScalarImageToIntensitySizeListSampleType::New();
           runlengthfilter->SetMinIntensity(this->GetMinIntensity());
           runlengthfilter->SetMaxIntensity(this->GetMaxIntensity());
@@ -181,6 +183,7 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
 
           sample = const_cast< SampleType* >(runlengthfilter->GetOutput());
       }else{
+	cout<<"\t Using ScalarImageToConnectedIntensitySizeListSampleType  "<<endl;
           ScalarImageToConnectedIntensitySizeListSamplePointerType runlengthfilter = ScalarImageToConnectedIntensitySizeListSampleType::New();
           runlengthfilter->SetMinIntensity(this->GetMinIntensity());
           runlengthfilter->SetMaxIntensity(this->GetMaxIntensity());

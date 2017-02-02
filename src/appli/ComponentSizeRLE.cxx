@@ -321,6 +321,7 @@ int executeRLE(int argc, char* argv[]){
         }
 
         if(useFullConnectivity){
+	cout<<"UsingFullConnectivity"<<endl;
             imgtorunlegth->SetFullConnectivity(useFullConnectivity);
         }
 
