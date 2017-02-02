@@ -178,5 +178,14 @@
       <default>0</default>
     </integer>
 
+    <image>
+      <name>outputEntropyImageFilename</name>
+      <label>Output entropy image</label>
+      <channel>output</channel>
+      <description>Write the output entropy image computed from the histogram</description>
+      <longflag>entropyImageFilename</longflag>
+      <default>""</default>
+    </image>
+
   </parameters>
 </executable>

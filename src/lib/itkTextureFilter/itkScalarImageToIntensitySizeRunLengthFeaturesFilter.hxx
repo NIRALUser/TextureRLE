@@ -21,6 +21,7 @@
 
 #include <itkDataObjectDecorator.h>
 
+
 namespace itk
 {
 namespace Statistics {
@@ -166,6 +167,7 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
       sample = this->GetListSample();
   }else{
       if(!this->GetUseDynamicThreshold()){
+        //This filter creates intensity bins between min and max of the region. Iterates through 
           ScalarImageToIntensitySizeListSamplePointerType runlengthfilter = ScalarImageToIntensitySizeListSampleType::New();
           runlengthfilter->SetMinIntensity(this->GetMinIntensity());
           runlengthfilter->SetMaxIntensity(this->GetMaxIntensity());
@@ -196,6 +198,8 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
       this->SetListSample(sample);
   }
 
+  //First we create a Histogram with the generated sample as is. This histogram will be used 
+  //to compute the quantiles in order to clip the tails and improve the histogram distribution. 
   typedef itk::Statistics::SampleToHistogramFilter< SampleType, HistogramType > SampleToHistogramFilterType;
   typedef typename  SampleToHistogramFilterType::Pointer SampleToHistogramFilterPointerType;
   typename SampleToHistogramFilterType::HistogramSizeType histogramSize(2);
@@ -228,7 +232,8 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
   }else{
       itkExceptionMacro("The percentile must be between [0, 100] -> " << this->GetPercentile())
   }
-
+  //Using the previously computed min, max - intensity; min, max - size 
+  //We generate a second histogram with the clipped values as min, max
   cout<<"Computing histogram..."<<endl;
   //Set the bin ranges for the histogram.
   MeasurementVectorType binmin;
@@ -300,6 +305,7 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
       }
       m_HistogramOutput <<","<<histogram->GetFrequency(i);
   }
+  //Here we have computed the histogram. 
   //Calculate the RLE features of the histogram.
   cout<<"Computing RLE analysis..."<<endl;
   HistogramToRunLengthFeaturesFilterPointerType histogramtorunlength = HistogramToRunLengthFeaturesFilterType::New();
@@ -316,6 +322,18 @@ ScalarImageToIntensitySizeRunLengthFeaturesFilter< TInputImage >
   this->SetShortRunHighGreyLevelEmphasis(histogramtorunlength->GetShortRunHighGreyLevelEmphasis());
   this->SetLongRunLowGreyLevelEmphasis(histogramtorunlength->GetLongRunLowGreyLevelEmphasis());
   this->SetLongRunHighGreyLevelEmphasis(histogramtorunlength->GetLongRunHighGreyLevelEmphasis());
+
+
+  //Using the computed histogram, we compute the entropy as well. 
+  HistogramToEntropyImageFilterPointerType entropyfilter = HistogramToEntropyImageFilterType::New();
+  entropyfilter->SetInput(histogram);
+  entropyfilter->Update();
+  this->SetEntropyImage(entropyfilter->GetOutput());
+
+  StatisticsImageFilterPointerType entropystats = StatisticsImageFilterType::New();
+  entropystats->SetInput(this->GetEntropyImage());
+  entropystats->Update();
+  this->SetEntropyImageStats(entropystats);
 
 }
 

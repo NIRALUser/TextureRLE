@@ -28,6 +28,9 @@
 #include "itkScalarImageToConnectedIntensitySizeListSampleFilter.h"
 #include <itkSampleToHistogramFilter.h>
 
+#include <itkHistogramToEntropyImageFilter.h>
+#include <itkStatisticsImageFilter.h>
+
 using namespace std;
 
 namespace itk
@@ -81,6 +84,14 @@ public:
 
     typedef itk::Statistics::ScalarImageToConnectedIntensitySizeListSampleFilter< InputImageType > ScalarImageToConnectedIntensitySizeListSampleType;
     typedef typename ScalarImageToConnectedIntensitySizeListSampleType::Pointer ScalarImageToConnectedIntensitySizeListSamplePointerType;
+
+    typedef itk::HistogramToEntropyImageFilter<HistogramType> HistogramToEntropyImageFilterType;
+    typedef typename HistogramToEntropyImageFilterType::Pointer HistogramToEntropyImageFilterPointerType;
+    typedef typename HistogramToEntropyImageFilterType::OutputImageType HistogramToEntropyImageFilterOutputImageType;
+    typedef typename HistogramToEntropyImageFilterOutputImageType::Pointer HistogramToEntropyImageFilterOutputImagePointerType;
+
+    typedef itk::StatisticsImageFilter<HistogramToEntropyImageFilterOutputImageType> StatisticsImageFilterType;
+    typedef typename StatisticsImageFilterType::Pointer StatisticsImageFilterPointerType;
 
 
     void PrintSelf(std::ostream & os, Indent indent) const ITK_OVERRIDE;
@@ -159,6 +170,12 @@ public:
     itkGetMacro(Percentile, int)
     itkSetMacro(Percentile, int)
 
+    itkSetMacro(EntropyImage, HistogramToEntropyImageFilterOutputImagePointerType)
+    itkGetMacro(EntropyImage, HistogramToEntropyImageFilterOutputImagePointerType)
+
+    itkGetMacro(EntropyImageStats, StatisticsImageFilterPointerType)
+    itkSetMacro(EntropyImageStats, StatisticsImageFilterPointerType)
+
     ostream* GetHistogramOutput(){
         return &m_HistogramOutput;
     }
@@ -216,6 +233,10 @@ private:
   SamplePointerType m_ListSample;
 
   int m_Percentile;
+
+  HistogramToEntropyImageFilterOutputImagePointerType m_EntropyImage;
+
+  StatisticsImageFilterPointerType m_EntropyImageStats;
 
 };
 

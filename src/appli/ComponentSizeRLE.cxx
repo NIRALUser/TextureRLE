@@ -3,6 +3,7 @@
 
 #include <itkImage.h>
 #include <itkImageFileReader.h>
+#include <itkImageFileWriter.h>
 #include <itkLabelImageToLabelMapFilter.h>
 #include <itkLabelMapMaskImageFilter.h>
 #include <itkMaskImageFilter.h>
@@ -164,7 +165,7 @@ int executeRLE(int argc, char* argv[]){
     if(outputHistogramVar){
         cout<<"\tThe output histogram will be written to pointer: "<<outputHistogramVar<<endl;
     }
-
+    //Read Image
     typedef double InputPixelType;
     static const int dimension = 3;
     typedef itk::Image< InputPixelType, dimension> InputImageType;
@@ -179,7 +180,7 @@ int executeRLE(int argc, char* argv[]){
 
     InputImagePointerType imgin = reader->GetOutput();
 
-
+    //Create LabelImageToLabelMapFilter: This filter allows querying the label map for labeled regions
     InputImagePointerType maskin = 0;
 
     typedef itk::LabelObject< InputPixelType, dimension > LabelObjectType;
@@ -197,7 +198,7 @@ int executeRLE(int argc, char* argv[]){
         minIntensity = numeric_limits< double >::max();
         maxIntensity = numeric_limits< double >::min();
     }
-
+    //If the input mask is set, the RLE analysis will only be computed over this region
     if(inputMask.compare("")!=0){
         typedef itk::ImageFileReader< InputImageType > InputImageFileReaderType;
         typedef InputImageFileReaderType::Pointer InputImageFileReaderPointerType;
@@ -219,7 +220,7 @@ int executeRLE(int argc, char* argv[]){
 
         mapimages[1] = maskfilter->GetOutput();
 
-    }else if(inputLabelMap.compare("") != 0){
+    }else if(inputLabelMap.compare("") != 0){//If the user sets a label map, each labeled region will be used for RLE analysis. 
         typedef itk::ImageFileReader< InputImageType > InputImageFileReaderType;
         typedef InputImageFileReaderType::Pointer InputImageFileReaderPointerType;
         typedef itk::LabelMapMaskImageFilter< LabelImageType, InputImageType > LabelMapMaskImageFilterType;
@@ -239,7 +240,7 @@ int executeRLE(int argc, char* argv[]){
         labelmap = labelmapfilter->GetOutput();
 
         labels = labelmap->GetLabels();
-
+        //Using the label map, we extract each labeled region
         for(unsigned i = 0; i < labels.size(); i++){
             InputPixelType currentlabel = labels[i];
 
@@ -262,7 +263,7 @@ int executeRLE(int argc, char* argv[]){
     ostringstream outhisto;
 
     ostringstream os;
-
+    //Default output column names 
     const string OutputNames[] = {
             "Input",
             "Label",
@@ -281,9 +282,10 @@ int executeRLE(int argc, char* argv[]){
             "ShortRunLowGreyLevelEmphasis",
             "ShortRunHighGreyLevelEmphasis",
             "LongRunLowGreyLevelEmphasis",
-            "LongRunHighGreyLevelEmphasis"
+            "LongRunHighGreyLevelEmphasis",
+            "Entropy"
     };
-
+    //Here we start generating the histogram output, We put the names as the header
     vector<string> OutputNamesVector(OutputNames, OutputNames + (sizeof(OutputNames)/sizeof(*OutputNames)));
     for(unsigned i = 0; i < OutputNamesVector.size(); i++){
         os<<OutputNames[i]<<",";
@@ -293,7 +295,7 @@ int executeRLE(int argc, char* argv[]){
     typedef ScalarImageToRunLengthIntensitySizeFilterType::SamplePointerType SamplePointerType;
 
     typedef map< InputPixelType, SamplePointerType > MapListSamplePointerType;
-
+    //For all the extracted labels we compute the RLE analysis
     for(MapInputImagePointerType::iterator iter = mapimages.begin(); iter != mapimages.end(); ++iter){
 
         cout<<endl<<"Label: "<<iter->first<<endl;
@@ -353,7 +355,16 @@ int executeRLE(int argc, char* argv[]){
             os<<imgtorunlegth->GetShortRunLowGreyLevelEmphasis()<<",";
             os<<imgtorunlegth->GetShortRunHighGreyLevelEmphasis()<<",";
             os<<imgtorunlegth->GetLongRunLowGreyLevelEmphasis()<<",";
-            os<<imgtorunlegth->GetLongRunHighGreyLevelEmphasis();
+            os<<imgtorunlegth->GetLongRunHighGreyLevelEmphasis()<<",";
+            os<<imgtorunlegth->GetEntropyImageStats()->GetSum();
+
+            if(outputEntropyImageFilename.compare("") != 0){
+                typedef itk::ImageFileWriter<ScalarImageToRunLengthIntensitySizeFilterType::HistogramToEntropyImageFilterOutputImageType> EntropyImageWriter;
+                EntropyImageWriter::Pointer entropywriter = EntropyImageWriter::New();
+                entropywriter->SetInput(imgtorunlegth->GetEntropyImage());
+                entropywriter->SetFileName(outputEntropyImageFilename);
+                entropywriter->Update();
+            }
 
         }catch(exception& ex){
             cerr<<"Input volume: " << inputVolume << endl;
