@@ -2,7 +2,7 @@
 <executable>
   <category>TextureAnalysis</category>
   <title>Co-occurrence matrix texture</title>
-  <version>1.0.2</version>
+  <version>1.0.3</version>
   <description>
     CoMatrixTextureTool calculates run length encoding 
   </description>
@@ -184,7 +184,6 @@
       <channel>output</channel>
       <description>Write the output entropy image computed from the histogram</description>
       <longflag>entropyImageFilename</longflag>
-      <default>""</default>
     </image>
 
   </parameters>
