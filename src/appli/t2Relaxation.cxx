@@ -21,14 +21,11 @@ typedef InputImageType::Pointer InputImagePointerType;
 typedef itk::ImageFileReader< InputImageType > InputImageFileReaderType;
 typedef InputImageFileReaderType::Pointer InputImageFileReaderPointerType;
 
-
-
 typedef double OutputPixelType;
 typedef itk::Image< OutputPixelType, Dimension> OutputImageType;
 typedef OutputImageType::Pointer OutputImagePointerType;
 typedef itk::ImageFileWriter< OutputImageType > OutputImageFileWriterType;
 typedef OutputImageFileWriterType::Pointer OutputImageFileWriterPointerType;
-
 
 typedef unsigned short RescalePixelType;
 typedef itk::Image< OutputPixelType, Dimension> RescaleImageType;

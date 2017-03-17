@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<executable>
+  <category>TextureAnalysis</category>
+  <title>Intensity calibration of T2 and T2FS (fat supressed) images</title>
+  <version>1.0.0</version>
+  <description> Wang et. al. 2013 A computerized MRI biomarker quantification scheme for a canine model of Duchenne muscular dystrophy. Intensity calibration: Ic(x, y, z) = 900 / (m1 – m2) × I (x, y, z) + (100 × m1 – 1000 × m2) / (m1 – m2) where I (x, y, z) is the intensity at voxel (x, y, z) in the non-calibrated T2w or T2fs and m1 and m2 are the mean intensities of the subcutaneous fat regions n non-calibrated T2w and T2fs, respectively.
+  </description>
+  <contributor>Juan Carlos Prieto</contributor>
+
+  <parameters>
+    <label>Input parameters</label>
+    <description>Input parameters</description>
+
+    <image>
+      <name>inputM1Filename</name>
+      <label>Input volume</label>
+      <channel>input</channel>
+      <description>Input volume to be calibrated</description>
+      <longflag>m1</longflag>
+    </image>
+
+    <image>
+      <name>inputM2Filename</name>
+      <label>Input volume</label>
+      <channel>input</channel>
+      <description>Second volume to be calibrated</description>
+      <longflag>m2</longflag>
+    </image>
+
+    <image>
+      <name>inputMaskFilename</name>
+      <label>Input Mask</label>
+      <channel>input</channel>
+      <description>Input masked region. This mask must include the subcutaneous fat regions</description>
+      <longflag>mask</longflag>
+    </image>
+
+    <integer>
+      <name>labelValue</name>
+      <longflag>label</longflag>
+      <description>Set the label to use corresponding to the fat region in the labeled image. Otherwise, it will use the first label detected in the labeled image if there is more than 1 label.</description>
+      <label>Label value</label>
+      <default>-1</default>
+    </integer>
+
+  </parameters>
+
+  <parameters>
+    <label>Ouput parameters</label>
+    <description>Output parameters</description>
+
+    <image>
+      <name>outputM1Filename</name>
+      <label>Calibrated image</label>
+      <channel>output</channel>
+      <description>Filename for the calibrated output image 1.</description>
+      <longflag>outm1</longflag>
+      <default>outm1.nrrd</default>
+    </image>
+
+    <image>
+      <name>outputM2Filename</name>
+      <label>Calibrated image</label>
+      <channel>output</channel>
+      <description>Filename for the calibrated output image 2.</description>
+      <longflag>outm2</longflag>
+      <default>outm2.nrrd</default>
+    </image>
+
+  </parameters>
+</executable>
