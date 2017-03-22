@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <executable>
   <category>TextureAnalysis</category>
-  <title>Intensity calibration of T2 and T2FS (fat supressed) images</title>
+  <title>Intensity calibration of T2 and T2FS (fat supressed) images. Optionally, computes the fatMap ratio as well</title>
   <version>1.0.0</version>
-  <description> Wang et. al. 2013 A computerized MRI biomarker quantification scheme for a canine model of Duchenne muscular dystrophy. Intensity calibration: Ic(x, y, z) = 900 / (m1 – m2) × I (x, y, z) + (100 × m1 – 1000 × m2) / (m1 – m2) where I (x, y, z) is the intensity at voxel (x, y, z) in the non-calibrated T2w or T2fs and m1 and m2 are the mean intensities of the subcutaneous fat regions n non-calibrated T2w and T2fs, respectively.
+  <description> Wang et. al. 2013 A computerized MRI biomarker quantification scheme for a canine model of Duchenne muscular dystrophy. Intensity calibration: Ic(x, y, z) = 900 / (m1 – m2) × I (x, y, z) + (100 × m1 – 1000 × m2) / (m1 – m2) where I (x, y, z) is the intensity at voxel (x, y, z) in the non-calibrated T2w or T2fs and m1 and m2 are the mean intensities of the subcutaneous fat regions n non-calibrated T2w and T2fs, respectively. The fat map is computed as 1 - T2FS/T2 using the calibrated images. 
   </description>
   <contributor>Juan Carlos Prieto</contributor>
 
@@ -43,6 +43,14 @@
       <default>-1</default>
     </integer>
 
+    <boolean>
+      <name>disableCalibration</name>
+      <longflag>disableCalibration</longflag>
+      <description>Disable image calibration.</description>
+      <label>Disable image calibration</label>
+      <default>false</default>
+    </boolean>
+
   </parameters>
 
   <parameters>
@@ -65,6 +73,15 @@
       <description>Filename for the calibrated output image 2.</description>
       <longflag>outm2</longflag>
       <default>outm2.nrrd</default>
+    </image>
+
+    <image>
+      <name>outputFatMapFilename</name>
+      <label>Fat map from calibrated images</label>
+      <channel>output</channel>
+      <description>Filename for the fat map.</description>
+      <longflag>outfm</longflag>
+      <default></default>
     </image>
 
   </parameters>

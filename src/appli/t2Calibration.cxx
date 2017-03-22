@@ -7,6 +7,7 @@
 #include <itkLabelImageToLabelMapFilter.h>
 #include <itkImageRegionIterator.h>
 #include <itkRescaleIntensityImageFilter.h>
+#include <itkCastImageFilter.h>
 
 using namespace std;
 
@@ -26,18 +27,23 @@ typedef LabelImageToLabelMapFilterType::Pointer LabelImageToLabelMapFilterPointe
 
 typedef itk::ImageRegionIterator<InputImageType> ImageRegionIteratorType;
 
+typedef itk::ImageFileWriter< InputImageType > InputImageFileWriterType;
+typedef InputImageFileWriterType::Pointer InputImageFileWriterPointerType;
+
 typedef double OutputPixelType;
 typedef itk::Image< OutputPixelType, Dimension> OutputImageType;
 typedef OutputImageType::Pointer OutputImagePointerType;
+
 typedef itk::ImageFileWriter< OutputImageType > OutputImageFileWriterType;
-
-
 
 typedef OutputImageFileWriterType::Pointer OutputImageFileWriterPointerType;
 typedef itk::ImageRegionIterator<OutputImageType> OutputRegionIteratorType;
 
 typedef itk::RescaleIntensityImageFilter< OutputImageType, OutputImageType > RescaleIntensityImageFilterType;
 typedef RescaleIntensityImageFilterType::Pointer RescaleIntensityImageFilterPointerType;
+
+typedef itk::CastImageFilter<OutputImageType, InputImageType> CastImageFilterType;
+typedef CastImageFilterType::Pointer CastImageFilterPointerType;
 
 /*Wang et. al. 2013 A computerized MRI biomarker quantification scheme for a canine model of Duchenne muscular dystrophy
 Intensity calibration:
@@ -51,17 +57,14 @@ and m1 and m2 are the mean intensities of the subcutaneous fat regions in non-ca
 int main (int argc, char * argv[]){
   PARSE_ARGS;
 
-  if(inputM1Filename.compare("") == 0 || inputM2Filename.compare("") == 0 || inputMaskFilename.compare("") == 0){
+  if(inputM1Filename.compare("") == 0 || inputM2Filename.compare("") == 0){
       commandLine.getOutput()->usage(commandLine);
       return EXIT_FAILURE;
   }
 
   cout << "The input 1 is: " << inputM1Filename << endl;
   cout << "The input 2 is: " << inputM2Filename << endl;
-  cout << "The mask is: " << inputMaskFilename << endl;
-  
-
-  
+    
   InputImageFileReaderPointerType reader1 = InputImageFileReaderType::New();
   reader1->SetFileName(inputM1Filename.c_str());
   InputImagePointerType imageM1 = reader1->GetOutput();
@@ -70,135 +73,196 @@ int main (int argc, char * argv[]){
   reader2->SetFileName(inputM2Filename.c_str());
   InputImagePointerType imageM2 = reader2->GetOutput();
 
-  InputImageFileReaderPointerType reader3 = InputImageFileReaderType::New();
-  reader3->SetFileName(inputMaskFilename.c_str());
-  InputImagePointerType imageMask = reader3->GetOutput();
-
-  LabelImageToLabelMapFilterPointerType labelImageToLabelMapFilter = LabelImageToLabelMapFilterType::New();
-  labelImageToLabelMapFilter->SetInput(imageMask);
-  labelImageToLabelMapFilter->Update();
-
-  LabelImageToLabelMapFilterType::OutputImageType::Pointer labelMap = labelImageToLabelMapFilter->GetOutput();
-
-  cout<<"Number of labels in the image = "<<labelMap->GetNumberOfLabelObjects()<<endl;
-
-  InputPixelType label = 0;
-  if(labelValue == -1){
-    if(labelMap->GetNumberOfLabelObjects() > 1){
-      cout<<"WARNING!! the image mask provided has more than 2 label. Using the first label to compute m1 and m2..."<<endl;
-    }
-    label = labelMap->GetNthLabelObject(1)->GetLabel();
-  }else{
-    label = labelValue;
-  }
-  cout<<"Using label: "<<label<<endl;
-   
-
-  LabelStatisticsImageFilterPointerType image1stats = LabelStatisticsImageFilterType::New();
-  image1stats->SetInput(imageM1);
-  image1stats->SetLabelInput(imageMask);
-  image1stats->Update();
-
-  LabelStatisticsImageFilterPointerType image2stats = LabelStatisticsImageFilterType::New();
-  image2stats->SetInput(imageM2);
-  image2stats->SetLabelInput(imageMask);
-  image2stats->Update();
-
-  double m1 = image1stats->GetMean(label);
-  double m2 = image2stats->GetMean(label);
-
-
-  OutputImagePointerType imageM1Cali = OutputImageType::New();
-  imageM1Cali->SetSpacing(imageM1->GetSpacing());
-  imageM1Cali->SetOrigin(imageM1->GetOrigin());
-  imageM1Cali->SetDirection(imageM1->GetDirection());
-  imageM1Cali->SetRegions(imageM1->GetLargestPossibleRegion());
-  imageM1Cali->Allocate(true);
-
-  OutputImagePointerType imageM2Cali = OutputImageType::New();
-  imageM2Cali->SetSpacing(imageM2->GetSpacing());
-  imageM2Cali->SetOrigin(imageM2->GetOrigin());
-  imageM2Cali->SetDirection(imageM2->GetDirection());
-  imageM2Cali->SetRegions(imageM2->GetLargestPossibleRegion());
-  imageM2Cali->Allocate(true);
-
-
-  ImageRegionIteratorType m1it = ImageRegionIteratorType(imageM1, imageM1->GetLargestPossibleRegion());
-  ImageRegionIteratorType m2it = ImageRegionIteratorType(imageM2, imageM2->GetLargestPossibleRegion());
-
-  OutputRegionIteratorType m1outit = OutputRegionIteratorType(imageM1Cali, imageM1Cali->GetLargestPossibleRegion());
-  OutputRegionIteratorType m2outit = OutputRegionIteratorType(imageM2Cali, imageM2Cali->GetLargestPossibleRegion());
-
-  m1it.GoToBegin();
-  m2it.GoToBegin();
-
-  m1outit.GoToBegin();
-  m2outit.GoToBegin();
-
-  cout<<"m1= "<<m1<<endl;
-  cout<<"m2= "<<m2<<endl;
-
-  cout<<"Calibrating image 1"<<endl;
-
-  while(!m1it.IsAtEnd()){
-    InputPixelType pix = m1it.Get();
-
-    double cali = 0;
-
-    if(m1 - m2 != 0){
-      cali = (900 * pix + 100 * m1 - 1000 * m2)/(m1 - m2);
+  if(!disableCalibration){
+    if(inputMaskFilename.compare("") == 0){
+      commandLine.getOutput()->usage(commandLine);
+      return EXIT_FAILURE;
     }
 
-    m1outit.Set((OutputPixelType) cali);
+    cout << "The mask is: " << inputMaskFilename << endl;
 
-    ++m1outit;
-    ++m1it;
-  }
+    InputImageFileReaderPointerType reader3 = InputImageFileReaderType::New();
+    reader3->SetFileName(inputMaskFilename.c_str());
+    InputImagePointerType imageMask = reader3->GetOutput();
+
+    LabelImageToLabelMapFilterPointerType labelImageToLabelMapFilter = LabelImageToLabelMapFilterType::New();
+    labelImageToLabelMapFilter->SetInput(imageMask);
+    labelImageToLabelMapFilter->Update();
+
+    LabelImageToLabelMapFilterType::OutputImageType::Pointer labelMap = labelImageToLabelMapFilter->GetOutput();
+
+    cout<<"Number of labels in the image = "<<labelMap->GetNumberOfLabelObjects()<<endl;
+
+    InputPixelType label = 0;
+    if(labelValue == -1){
+      if(labelMap->GetNumberOfLabelObjects() > 1){
+        cout<<"WARNING!! the image mask provided has more than 2 label. Using the first label to compute m1 and m2..."<<endl;
+      }
+      label = labelMap->GetNthLabelObject(1)->GetLabel();
+    }else{
+      label = labelValue;
+    }
+    cout<<"Using label: "<<label<<endl;
+     
+
+    LabelStatisticsImageFilterPointerType image1stats = LabelStatisticsImageFilterType::New();
+    image1stats->SetInput(imageM1);
+    image1stats->SetLabelInput(imageMask);
+    image1stats->Update();
+
+    LabelStatisticsImageFilterPointerType image2stats = LabelStatisticsImageFilterType::New();
+    image2stats->SetInput(imageM2);
+    image2stats->SetLabelInput(imageMask);
+    image2stats->Update();
+
+    double m1 = image1stats->GetMean(label);
+    double m2 = image2stats->GetMean(label);
 
 
-  cout<<"Calibrating image 2"<<endl;
-  while(!m2it.IsAtEnd()){
-    InputPixelType pix = m2it.Get();
+    OutputImagePointerType imageM1Cali = OutputImageType::New();
+    imageM1Cali->SetSpacing(imageM1->GetSpacing());
+    imageM1Cali->SetOrigin(imageM1->GetOrigin());
+    imageM1Cali->SetDirection(imageM1->GetDirection());
+    imageM1Cali->SetRegions(imageM1->GetLargestPossibleRegion());
+    imageM1Cali->Allocate(true);
 
-    double cali = 0;
+    OutputImagePointerType imageM2Cali = OutputImageType::New();
+    imageM2Cali->SetSpacing(imageM2->GetSpacing());
+    imageM2Cali->SetOrigin(imageM2->GetOrigin());
+    imageM2Cali->SetDirection(imageM2->GetDirection());
+    imageM2Cali->SetRegions(imageM2->GetLargestPossibleRegion());
+    imageM2Cali->Allocate(true);
 
-    if(m1 - m2 != 0){
-      cali = (900 * pix + 100 * m1 - 1000 * m2)/(m1 - m2);
+
+    ImageRegionIteratorType m1it = ImageRegionIteratorType(imageM1, imageM1->GetLargestPossibleRegion());
+    ImageRegionIteratorType m2it = ImageRegionIteratorType(imageM2, imageM2->GetLargestPossibleRegion());
+
+    OutputRegionIteratorType m1outit = OutputRegionIteratorType(imageM1Cali, imageM1Cali->GetLargestPossibleRegion());
+    OutputRegionIteratorType m2outit = OutputRegionIteratorType(imageM2Cali, imageM2Cali->GetLargestPossibleRegion());
+
+    m1it.GoToBegin();
+    m2it.GoToBegin();
+
+    m1outit.GoToBegin();
+    m2outit.GoToBegin();
+
+    cout<<"m1= "<<m1<<endl;
+    cout<<"m2= "<<m2<<endl;
+
+    cout<<"Calibrating image 1"<<endl;
+
+    while(!m1it.IsAtEnd()){
+      InputPixelType pix = m1it.Get();
+
+      double cali = 0;
+
+      if(m1 - m2 != 0){
+        cali = (900 * pix + 100 * m1 - 1000 * m2)/(m1 - m2);
+      }
+
+      m1outit.Set((OutputPixelType) cali);
+
+      ++m1outit;
+      ++m1it;
     }
 
-    m2outit.Set((OutputPixelType) cali);
 
-    ++m2it;
-    ++m2outit;
+    cout<<"Calibrating image 2"<<endl;
+    while(!m2it.IsAtEnd()){
+      InputPixelType pix = m2it.Get();
+
+      double cali = 0;
+
+      if(m1 - m2 != 0){
+        cali = (900 * pix + 100 * m1 - 1000 * m2)/(m1 - m2);
+      }
+
+      m2outit.Set((OutputPixelType) cali);
+
+      ++m2it;
+      ++m2outit;
+    }
+
+
+    cout<<"Rescaling image: between: 0-"<<numeric_limits<InputPixelType>::max() - 1<<endl;
+    RescaleIntensityImageFilterPointerType rescaleimage1 = RescaleIntensityImageFilterType::New();
+    rescaleimage1->SetOutputMinimum(0);
+    rescaleimage1->SetOutputMaximum(numeric_limits<InputPixelType>::max() - 1);
+    rescaleimage1->SetInput(imageM1Cali);
+    rescaleimage1->Update();
+
+    CastImageFilterPointerType castimage1 = CastImageFilterType::New();
+    castimage1->SetInput(rescaleimage1->GetOutput());
+    castimage1->Update();
+
+    imageM1 = castimage1->GetOutput();
+
+    cout << "The output calibrated volume is: " << outputM1Filename << endl;  
+    InputImageFileWriterPointerType writer1 = InputImageFileWriterType::New();
+    writer1->SetFileName(outputM1Filename.c_str());
+    writer1->SetInput(imageM1);
+    writer1->Update();
+
+    cout<<"Rescaling image: between: 0-"<<numeric_limits<InputPixelType>::max() - 1<<endl;
+    RescaleIntensityImageFilterPointerType rescaleimage2 = RescaleIntensityImageFilterType::New();
+    rescaleimage2->SetOutputMinimum(0);
+    rescaleimage2->SetOutputMaximum(numeric_limits<InputPixelType>::max() - 1);
+    rescaleimage2->SetInput(imageM2Cali);
+    rescaleimage2->Update();
+
+    CastImageFilterPointerType castimage2 = CastImageFilterType::New();
+    castimage2->SetInput(rescaleimage2->GetOutput());
+    castimage2->Update();
+
+    imageM2 = castimage2->GetOutput();
+
+    cout << "The output calibrated volume is: " << outputM2Filename << endl;  
+    InputImageFileWriterPointerType writer2 = InputImageFileWriterType::New();
+    writer2->SetFileName(outputM2Filename.c_str());
+    writer2->SetInput(imageM2);
+    writer2->Update();
+
+
   }
 
+  if(outputFatMapFilename.compare("") != 0){
+    cout << "The output fatMap volume is: " << outputFatMapFilename << endl;  
 
-  cout<<"Rescaling image: between: 0-"<<numeric_limits<InputPixelType>::max()<<endl;
-  RescaleIntensityImageFilterPointerType rescaleimage1 = RescaleIntensityImageFilterType::New();
-  rescaleimage1->SetOutputMinimum(0);
-  rescaleimage1->SetOutputMaximum(numeric_limits<InputPixelType>::max());
-  rescaleimage1->SetInput(imageM1Cali);
-  rescaleimage1->Update();
+    OutputImagePointerType imageFatMap = OutputImageType::New();
+    imageFatMap->SetSpacing(imageM1->GetSpacing());
+    imageFatMap->SetOrigin(imageM1->GetOrigin());
+    imageFatMap->SetDirection(imageM1->GetDirection());
+    imageFatMap->SetRegions(imageM1->GetLargestPossibleRegion());
+    imageFatMap->Allocate(true);
 
+    ImageRegionIteratorType m1it = ImageRegionIteratorType(imageM1, imageM1->GetLargestPossibleRegion());
+    ImageRegionIteratorType m2it = ImageRegionIteratorType(imageM2, imageM2->GetLargestPossibleRegion());
 
-  cout << "The output calibrated volume is: " << outputM1Filename << endl;  
-  OutputImageFileWriterPointerType writer1 = OutputImageFileWriterType::New();
-  writer1->SetFileName(outputM1Filename.c_str());
-  writer1->SetInput(rescaleimage1->GetOutput());
-  writer1->Update();
+    OutputRegionIteratorType outit = OutputRegionIteratorType(imageFatMap, imageFatMap->GetLargestPossibleRegion());
 
-  cout<<"Rescaling image: between: 0-"<<numeric_limits<InputPixelType>::max()<<endl;
-  RescaleIntensityImageFilterPointerType rescaleimage2 = RescaleIntensityImageFilterType::New();
-  rescaleimage2->SetOutputMinimum(0);
-  rescaleimage2->SetOutputMaximum(numeric_limits<InputPixelType>::max());
-  rescaleimage2->SetInput(imageM2Cali);
-  rescaleimage2->Update();
+    m1it.GoToBegin();
+    m2it.GoToBegin();
+    outit.GoToBegin();
 
-  cout << "The output calibrated volume is: " << outputM2Filename << endl;  
-  OutputImageFileWriterPointerType writer2 = OutputImageFileWriterType::New();
-  writer2->SetFileName(outputM2Filename.c_str());
-  writer2->SetInput(rescaleimage2->GetOutput());
-  writer2->Update();
+    while(!m1it.IsAtEnd() && !m2it.IsAtEnd()){
+      OutputPixelType outpix = 1.0 - ((m2it.Get() + 1.0)/(m1it.Get() + 1.0));
+      if(outpix < 0){
+        outpix = 0;
+      }
+
+      outit.Set(outpix);
+
+      ++outit;
+      ++m1it;
+      ++m2it;
+    }
+
+    OutputImageFileWriterPointerType writerFat = OutputImageFileWriterType::New();
+    writerFat->SetFileName(outputFatMapFilename.c_str());
+    writerFat->SetInput(imageFatMap);
+    writerFat->Update();
+  }
+  
 
   return EXIT_SUCCESS;
 
