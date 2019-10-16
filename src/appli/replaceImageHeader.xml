@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<executable>
+  <category>Processing</category>
+  <title>replaceImageHeader</title>
+  <version>1.0</version>
+  <description>
+    Replaces Origin, Spacing and Direction of an image. Does not modify it's size. 
+  </description>
+  <contributor>Juan Carlos Prieto</contributor>
+  <parameters>        
+    <label>Input parameters</label>
+    <description>Input parameters</description>
+
+    <file>
+      <name>inputFilename</name>      
+      <flag>i</flag>
+      <longflag>img</longflag>
+      <description>Input image</description>
+    </file>
+
+    <file>
+      <name>referenceFilename</name>      
+      <flag>r</flag>
+      <longflag>ref</longflag>
+      <description>Reference input image</description>
+    </file>
+
+    <boolean>
+      <name>compareHeaders</name>
+      <longflag>compare</longflag>
+      <default>0</default>
+      <description>Compare headers of both images and exit with error if they are different. Does not write an output image</description>
+    </boolean>
+
+  </parameters>
+
+  <parameters>
+    <label>Ouput parameters</label>
+    <description>Output parameters</description>
+
+    <file>
+      <name>outputFilename</name>      
+      <flag>o</flag>
+      <longflag>out</longflag>
+      <description>Output filename</description>
+    </file>
+
+  </parameters>
+</executable>

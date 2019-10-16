@@ -50,11 +50,13 @@ int main (int argc, char * argv[]){
 
   cout << "The input volume is: " << inputVolume << endl;
   cout << "The echo time is: " << echoTime <<endl;
+  cout << "The M0 value is: " << m0 <<endl;
 
   
   InputImageFileReaderPointerType reader = InputImageFileReaderType::New();
   reader->SetFileName(inputVolume.c_str());
   InputImagePointerType imgin = reader->GetOutput();
+  cout << "The number of components per pixel is: " << imgin->GetNumberOfComponentsPerPixel() <<endl;
 
 
   typedef itk::T2RelaxationMapFilter<InputImageType, OutputImageType> T2RelaxationMapFilterType;
